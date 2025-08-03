@@ -300,22 +300,31 @@
                 }
             });
 
-            btnAddToHomeScreen.addEventListener('click', () => {
-                if (deferredPrompt) {
-                    deferredPrompt.prompt();
-                    deferredPrompt.userChoice.then((choiceResult) => {
-                        if (choiceResult.outcome === 'accepted') {
-                            console.log('User menambahkan aplikasi ke layar utama');
-                            isAppInstalled = true;
-                            enableForm();
-                            installPromptDiv.classList.add('hidden');
-                        } else {
-                            console.log('User membatalkan penambahan ke layar utama');
-                        }
-                        deferredPrompt = null;
-                    });
-                }
-            });
+           btnAddToHomeScreen.addEventListener('click', () => {
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+                console.log('User menambahkan aplikasi ke layar utama');
+
+                // Coba menutup browser (tidak semua browser mengizinkan ini)
+                setTimeout(() => {
+                    try {
+                        window.open('', '_self', '');
+                        window.close();
+                    } catch (e) {
+                        alert("✅ Aplikasi berhasil ditambahkan ke layar utama.\n\nSilakan tutup tab ini secara manual dan buka dari layar utama.");
+                    }
+                }, 1000);
+            } else {
+                console.log('User membatalkan penambahan ke layar utama');
+            }
+            deferredPrompt = null;
+            installPromptDiv.classList.add('hidden');
+        });
+    }
+});
+
 
             // Hide prompt when app is installed
             window.addEventListener('appinstalled', () => {
