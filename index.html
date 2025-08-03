@@ -60,6 +60,7 @@
         #btnExport { background: #17a2b8; color: white; }
         #btnClearAll { background: #dc3545; color: white; }
         #btnSimpan { font-size: 18px; width: 100%; padding: 12px; background: #28a745; color: white; }
+        #btnAddToHomeScreen { background: #ff9500; color: white; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -68,6 +69,10 @@
         <button type="button" id="btnForm">📝 Form Input</button>
         <button type="button" id="btnData">📊 Lihat Data (<span id="dataCount">0</span>)</button>
         <button type="button" id="btnExport">💾 Export Data</button>
+    </div>
+    <div id="installPrompt" class="warning hidden">
+        Tambahkan aplikasi ini ke layar utama untuk akses lebih cepat!
+        <button id="btnAddToHomeScreen">📱 Tambah ke Layar Utama</button>
     </div>
     <div id="formSection">
         <form id="bukuTamuForm" onsubmit="return false;">
@@ -187,7 +192,7 @@
     </div>
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('service-worker.js')
+            navigator.serviceWorker.register('/coba3/service-worker.js')
                 .then(reg => console.log("Service worker terdaftar:", reg))
                 .catch(err => console.error("Gagal daftar SW:", err));
         }
@@ -215,14 +220,45 @@
             const btnSimpan = document.getElementById('btnSimpan');
             const btnClearSignature = document.getElementById('btnClearSignature');
             const btnAmbilFoto = document.getElementById('btnAmbilFoto');
+            const btnAddToHomeScreen = document.getElementById('btnAddToHomeScreen');
+            const installPromptDiv = document.getElementById('installPrompt');
 
             let drawing = false;
             let hasSignature = false;
             let hasPhoto = false;
             let dataBukuTamu = JSON.parse(localStorage.getItem('dataBukuTamu') || '[]');
+            let deferredPrompt = null;
 
             // Update data counter on load
             updateDataCounter();
+
+            // Handle Add to Home Screen prompt
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                installPromptDiv.classList.remove('hidden');
+            });
+
+            btnAddToHomeScreen.addEventListener('click', () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    deferredPrompt.userChoice.then((choiceResult) => {
+                        if (choiceResult.outcome === 'accepted') {
+                            console.log('User menambahkan aplikasi ke layar utama');
+                        } else {
+                            console.log('User membatalkan penambahan ke layar utama');
+                        }
+                        deferredPrompt = null;
+                        installPromptDiv.classList.add('hidden');
+                    });
+                }
+            });
+
+            // Hide prompt if app is already installed
+            window.addEventListener('appinstalled', () => {
+                console.log('Aplikasi telah diinstal ke layar utama');
+                installPromptDiv.classList.add('hidden');
+            });
 
             // === DATA LENGKAP UNTUK DESA ===
             const dataDesa = {
@@ -348,7 +384,6 @@
                 document.getElementById('signatureWarning').classList.add('hidden');
             }
 
-            // Initialize camera with better error handling
             if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
                 navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
                     .then(stream => {
