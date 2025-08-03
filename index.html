@@ -4,11 +4,12 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#007bff" />
+    <!-- iOS -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="BukuTamu" />
-    <link rel="apple-touch-icon" href="/coba3/icon-192.png" />
-    <link rel="manifest" href="/coba3/manifest.json" />
+    <link rel="apple-touch-icon" href="icon-192.png" />
+    <link rel="manifest" href="manifest.json" />
     <title>Buku Tamu Digital</title>
     <style>
         body {
@@ -60,61 +61,28 @@
         #btnExport { background: #17a2b8; color: white; }
         #btnClearAll { background: #dc3545; color: white; }
         #btnSimpan { font-size: 18px; width: 100%; padding: 12px; background: #28a745; color: white; }
-        #btnAddToHomeScreen { background: #ff9500; color: white; margin-top: 10px; }
-        .disabled-section {
-            pointer-events: none;
-            opacity: 0.5;
-        }
-        #overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            display: none;
-        }
-        #installPopup {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            z-index: 1001;
-            text-align: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-            display: none;
-        }
     </style>
 </head>
 <body>
-    <div id="overlay"></div>
-    <div id="installPopup" class="warning">
-        Tambahkan aplikasi ini ke layar utama untuk akses lebih cepat!
-        <button id="btnAddToHomeScreen">📱 Tambah ke Layar Utama</button>
-    </div>
     <h1>BUKU TAMU INSPEKTORAT DAERAH</h1>
     <div style="margin-bottom: 20px; display: flex; gap: 10px;">
         <button type="button" id="btnForm">📝 Form Input</button>
         <button type="button" id="btnData">📊 Lihat Data (<span id="dataCount">0</span>)</button>
         <button type="button" id="btnExport">💾 Export Data</button>
     </div>
-    <div id="formSection" class="disabled-section">
+    <div id="formSection">
         <form id="bukuTamuForm" onsubmit="return false;">
             <label>Nama: <span class="required">*</span></label>
-            <input id="nama" required type="text" disabled /><br /><br />
+            <input id="nama" required type="text" /><br /><br />
             <label>INSTANSI/ASAL: <span class="required">*</span></label>
-            <select id="asal" required disabled>
+            <select id="asal" required>
                 <option value="">-- Pilih Asal --</option>
                 <option value="INSTANSI">INSTANSI/UNIT KERJA</option>
                 <option value="MASYARAKAT">MASYARAKAT</option>
             </select><br /><br />
             <div class="hidden" id="daftarInstansi">
                 <label>DAFTAR INSTANSI/UNIT KERJA: <span class="required">*</span></label>
-                <select id="instansi" disabled>
+                <select id="instansi">
                     <option value="">-- Pilih Instansi --</option>
                     <option>SEKRETARIAT DAERAH</option>
                     <option>SEKRETARIAT DPRD</option>
@@ -153,7 +121,7 @@
             </div>
             <div class="hidden" id="daftarMasyarakat">
                 <label>Kecamatan: <span class="required">*</span></label>
-                <select id="kecamatan" disabled>
+                <select id="kecamatan">
                     <option value="">-- Pilih Kecamatan --</option>
                     <option value="Tulang Bawang Tengah">Tulang Bawang Tengah</option>
                     <option value="Tulang Bawang Udik">Tulang Bawang Udik</option>
@@ -166,12 +134,12 @@
                     <option value="Batu Putih">Batu Putih</option>
                 </select><br /><br />
                 <label>Desa/Tiyuh: <span class="required">*</span></label>
-                <select id="desa" disabled>
+                <select id="desa">
                     <option value="">-- Pilih Desa --</option>
                 </select><br /><br />
             </div>
-            <label>PIHAK YANG DITEMUI: <span class="required">*</span></label>
-            <select id="pihakDitemui" required disabled>
+            <label>PIHAK YANG'de DITEMUI: <span class="required">*</span></label>
+            <select id="pihakDitemui" required>
                 <option value="">-- Pilih Pihak yang Ditemui --</option>
                 <option>INSPEKTUR</option>
                 <option>SEKRETARIS</option>
@@ -182,7 +150,7 @@
                 <option>IRBAN 4</option>
             </select><br /><br />
             <label>JENIS LAYANAN: <span class="required">*</span></label>
-            <select id="jenisLayanan" required disabled>
+            <select id="jenisLayanan" required>
                 <option value="">-- Pilih Jenis Layanan --</option>
                 <option>Permintaan Audit/Klarifikasi Khusus</option>
                 <option>Penanganan Pengaduan</option>
@@ -194,21 +162,20 @@
                 <option>Tindak Lanjut Temuan</option>
             </select><br /><br />
             <label>URAIAN: <span class="required">*</span></label>
-            <input id="uraian" required type="text" disabled /><br /><br />
+            <input id="uraian" required type="text" /><br /><br />
             <label>NOMOR HP: <span class="required">*</span></label>
-            <input id="nomorHp" inputmode="numeric" pattern="\d*" required type="text" disabled /><br /><br />
+            <input id="nomorHp" inputmode="numeric" pattern="\d*" required type="text" /><br /><br />
             <label>Tanda Tangan: <span class="required">*</span></label>
             <div class="warning hidden" id="signatureWarning">⚠️ Tanda tangan wajib diisi!</div>
-            <canvas id="signature-pad" style="border:1px solid #ccc; width: 100%; border-radius: 4px; pointer-events: none;"></canvas><br />
-            <button type="button" id="btnClearSignature" style="margin-top: 5px;" disabled>🧹 Bersihkan</button><br /><br />
+            <canvas id="signature-pad" style="border:1px solid #ccc; width: 100%; border-radius: 4px;"></canvas><br />
+            <button type="button" id="btnClearSignature" style="margin-top: 5px;">🧹 Bersihkan</button><br /><br />
             <label>Foto: <span class="required">*</span></label>
-            <div class="warning hidden" id="photoWarning">⚠️ Foto wajib diambil atau diunggah!</div>
+            <div class="warning hidden" id="photoWarning">⚠️ Foto wajib diambil!</div>
             <video id="video" width="300" height="225" autoplay muted playsinline style="border:1px solid #ccc;"></video><br />
             <canvas id="canvas" width="300" height="225" style="display:none;"></canvas>
-            <button type="button" id="btnAmbilFoto" style="margin-top: 10px;" disabled>📸 Ambil Foto</button>
-            <input type="file" id="fotoUpload" accept="image/*" style="margin-top: 10px;" disabled /><br /><br />
+            <button type="button" id="btnAmbilFoto" style="margin-top: 10px;">📸 Ambil Foto</button><br /><br />
             <img id="previewFoto" style="width:300px;display:none;border:1px solid #ccc;margin-bottom:10px;" alt="Hasil Foto">
-            <button type="button" id="btnSimpan" disabled>💾 Simpan Data</button>
+            <button type="button" id="btnSimpan">💾 Simpan Data</button>
         </form>
     </div>
     <div id="dataSection" class="hidden">
@@ -220,20 +187,13 @@
     </div>
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/coba3/service-worker.js')
-                .then(reg => console.log("Service worker terdaftar:", reg.scope))
-                .catch(err => {
-                    console.error("Gagal daftar SW:", err);
-                    alert("Gagal mendaftarkan Service Worker: " + err.message);
-                });
-        } else {
-            console.error("Service Worker tidak didukung oleh browser ini.");
-            alert("Browser Anda tidak mendukung Service Worker. Silakan gunakan browser modern seperti Chrome.");
+            navigator.serviceWorker.register('service-worker.js')
+                .then(reg => console.log("Service worker terdaftar:", reg))
+                .catch(err => console.error("Gagal daftar SW:", err));
         }
 
         document.addEventListener('DOMContentLoaded', () => {
             const form = document.getElementById('bukuTamuForm');
-            const formSection = document.getElementById('formSection');
             const asal = document.getElementById("asal");
             const daftarInstansi = document.getElementById("daftarInstansi");
             const daftarMasyarakat = document.getElementById("daftarMasyarakat");
@@ -246,7 +206,6 @@
             const video = document.getElementById('video');
             const photoCanvas = document.getElementById('canvas');
             const previewFoto = document.getElementById('previewFoto');
-            const fotoUpload = document.getElementById('fotoUpload');
 
             const btnForm = document.getElementById('btnForm');
             const btnData = document.getElementById('btnData');
@@ -255,85 +214,18 @@
             const btnSimpan = document.getElementById('btnSimpan');
             const btnClearSignature = document.getElementById('btnClearSignature');
             const btnAmbilFoto = document.getElementById('btnAmbilFoto');
-            const btnAddToHomeScreen = document.getElementById('btnAddToHomeScreen');
-            const installPopup = document.getElementById('installPopup');
-            const overlay = document.getElementById('overlay');
 
             let drawing = false;
             let hasSignature = false;
             let hasPhoto = false;
-            let dataBukuTamu = JSON.parse(localStorage.getItem('dataBukuTamu') || '[]');
-            let deferredPrompt = null;
-            let isAppInstalled = false;
-
-            // Update data counter on load
-            updateDataCounter();
-
-            // Check if app is running in standalone mode (already installed)
-            if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
-                isAppInstalled = true;
-                enableForm();
-                installPopup.classList.add('hidden');
-                overlay.classList.add('hidden');
-            } else {
-                showPopup();
-            }
-
-            // Handle Add to Home Screen prompt
-            window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();
-                deferredPrompt = e;
-                if (!isAppInstalled) {
-                    showPopup();
-                }
-            });
-
-            btnAddToHomeScreen.addEventListener('click', () => {
-                if (deferredPrompt) {
-                    deferredPrompt.prompt();
-                    deferredPrompt.userChoice.then((choiceResult) => {
-                        if (choiceResult.outcome === 'accepted') {
-                            console.log('User menambahkan aplikasi ke layar utama');
-                            isAppInstalled = true;
-                            enableForm();
-                            installPopup.classList.add('hidden');
-                            overlay.classList.add('hidden');
-                        } else {
-                            console.log('User membatalkan penambahan ke layar utama');
-                            showPopup(); // Show popup again if declined
-                        }
-                        deferredPrompt = null;
-                    });
-                }
-            });
-
-            // Hide prompt when app is installed
-            window.addEventListener('appinstalled', () => {
-                console.log('Aplikasi telah diinstal ke layar utama');
-                isAppInstalled = true;
-                enableForm();
-                installPopup.classList.add('hidden');
-                overlay.classList.add('hidden');
-            });
-
-            function showPopup() {
-                installPopup.classList.remove('hidden');
-                overlay.classList.remove('hidden');
-            }
-
-            function enableForm() {
-                formSection.classList.remove('disabled-section');
-                document.querySelectorAll('#bukuTamuForm input, #bukuTamuForm select, #btnSimpan, #btnClearSignature, #btnAmbilFoto, #fotoUpload').forEach(el => {
-                    el.removeAttribute('disabled');
-                });
-                signatureCanvas.style.pointerEvents = 'auto';
-                initializeCamera();
-            }
+            let dataBukuTamu = [];
 
             // === DATA LENGKAP UNTUK DESA ===
             const dataDesa = {
                 "Lambu Kibang": ["Kibang Budi Jaya", "Lesung Bhakti Jaya", "Mekar Sari Jaya", "Pagar Jaya", "Gunung Sari", "Sumber Rejo", "Kibang Yekti Jaya", "Kibang Tri Jaya", "Gilang Tunggal Makarta", "Kibang Mulya Jaya"],
-                "Tulang Bawang Tengah": ["Penumangan", "Penumangan Baru", "Menggala Mas", "Bandar Dewa", "Panaragan", "Panaragan Jaya Indah", "Panaragan Jaya Utama", "Tirta Kencana", "Tirta Makmur", "Pulung Kencana", "Mulya Jaya", "Mulya Kencana", "Candra Mukti", "Candra Kencana", "Candra Jaya", "Tunas Asri", "Wonokerto", "Mekar Asri", "Marga Asri"],
+                "Tulang Bawang Tengah": ["Penumangan", "Penumangan Baru", "Menggala Mas", "Bandar Dewa", "Panaragan", "Panaragan Jaya Indah", "Panaragan Jaya Utama", "Tirta Kencana", "Tirta Makmur", "Pulung Kencana", "Mulya Jaya", "M
+
+ulya Kencana", "Candra Mukti", "Candra Kencana", "Candra Jaya", "Tunas Asri", "Wonokerto", "Mekar Asri", "Marga Asri"],
                 "Gunung Agung": ["Tunas Jaya", "Mulya Jaya", "Mulya Sari", "Mekar Jaya", "Bangun Jaya", "Dwikora Jaya", "Marga Jaya", "Sumber Jaya", "Sumber Rejeki", "Jaya Murni", "Wonorejo", "Suka Jaya", "Tri Jaya Tunggal"],
                 "Tumijajar": ["Murni Jaya", "Daya Asri", "Daya Sakti", "Makarti", "Sumber Rejo", "Margodadi", "Gunung Menanti", "Gunung Timbul", "Margo Mulyo"],
                 "Way Kenanga": ["Agung Jaya", "Mercubuana", "Balam Jaya", "Pagar Buana", "Indraloka I", "Indraloka II", "Balam Asri", "Indraloka Jaya", "Indraloka Mukti", "Sido Agung"],
@@ -366,7 +258,6 @@
             asal.addEventListener('change', handleAsalChange);
             kecamatan.addEventListener('change', populateDesa);
             nomorHp.addEventListener('input', () => { nomorHp.value = nomorHp.value.replace(/\D/g, ''); });
-            fotoUpload.addEventListener('change', handlePhotoUpload);
 
             signatureCanvas.addEventListener('mousedown', startDrawing);
             signatureCanvas.addEventListener('mousemove', draw);
@@ -427,7 +318,6 @@
             }
 
             function startDrawing(e) {
-                if (!isAppInstalled) return;
                 e.preventDefault();
                 drawing = true;
                 hasSignature = true;
@@ -437,7 +327,6 @@
             }
 
             function draw(e) {
-                if (!isAppInstalled) return;
                 e.preventDefault();
                 if (!drawing) return;
                 const { x, y } = getCanvasPos(e);
@@ -456,35 +345,18 @@
                 document.getElementById('signatureWarning').classList.add('hidden');
             }
 
-            function initializeCamera() {
-                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                    navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
-                        .then(stream => {
-                            video.srcObject = stream;
-                            console.log("Stream kamera berhasil:", stream.getVideoTracks());
-                        })
-                        .catch(err => {
-                            console.error("Kamera Error:", err.name, err.message);
-                            let errorMessage = "Kamera tidak bisa diakses. Mohon izinkan akses kamera pada browser Anda atau unggah foto.";
-                            if (err.name === "NotFoundError") {
-                                errorMessage = "Kamera tidak ditemukan. Pastikan perangkat Anda memiliki kamera aktif atau unggah foto.";
-                            } else if (err.name === "NotAllowedError") {
-                                errorMessage = "Izin kamera ditolak. Mohon izinkan akses kamera di pengaturan browser atau unggah foto.";
-                            } else if (err.name === "NotReadableError") {
-                                errorMessage = "Kamera sedang digunakan oleh aplikasi lain. Tutup aplikasi tersebut dan coba lagi atau unggah foto.";
-                            }
-                            alert(errorMessage);
-                        });
-                } else {
-                    alert("Browser Anda tidak mendukung akses kamera. Silakan unggah foto sebagai gantinya.");
-                }
-            }
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+                .then(stream => { video.srcObject = stream; })
+                .catch(err => {
+                    console.error("Kamera Error:", err);
+                    alert("Kamera tidak bisa diakses. Mohon izinkan akses kamera pada browser Anda.");
+                });
 
             function ambilFoto() {
                 const context = photoCanvas.getContext('2d');
-                photoCanvas.width = video.videoWidth || 300;
-                photoCanvas.height = video.videoHeight || 225;
-                context.drawImage(video, 0, 0, photoCanvas.width, photoCanvas.height);
+                photoCanvas.width = video.videoWidth;
+                photoCanvas.height = video.videoHeight;
+                context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
                 previewFoto.src = photoCanvas.toDataURL('image/png');
                 previewFoto.style.display = 'block';
                 hasPhoto = true;
@@ -495,20 +367,6 @@
                     btnAmbilFoto.innerHTML = '📸 Ambil Foto';
                     btnAmbilFoto.style.background = '';
                 }, 2000);
-            }
-
-            function handlePhotoUpload(e) {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        previewFoto.src = e.target.result;
-                        previewFoto.style.display = 'block';
-                        hasPhoto = true;
-                        document.getElementById('photoWarning').classList.add('hidden');
-                    };
-                    reader.readAsDataURL(file);
-                }
             }
 
             function simpanData() {
@@ -549,12 +407,11 @@
                     uraian: document.getElementById('uraian').value,
                     nomorHp: nomorHp.value,
                     tandaTangan: signatureCanvas.toDataURL('image/png'),
-                    foto: previewFoto.src,
+                    foto: photoCanvas.toDataURL('image/png'),
                     timestamp: new Date().toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' })
                 };
 
                 dataBukuTamu.push(formData);
-                localStorage.setItem('dataBukuTamu', JSON.stringify(dataBukuTamu));
                 updateDataCounter();
                 alert(`✅ Data berhasil disimpan! Total data: ${dataBukuTamu.length}`);
                 resetFormComplete();
@@ -568,7 +425,6 @@
                 daftarInstansi.classList.add("hidden");
                 daftarMasyarakat.classList.add("hidden");
                 document.getElementById('nama').focus();
-                fotoUpload.value = '';
             }
 
             function updateDataCounter() {
@@ -608,7 +464,6 @@
             window.deleteData = function(index) {
                 if (confirm(`Yakin ingin menghapus data tamu #${index + 1}?`)) {
                     dataBukuTamu.splice(index, 1);
-                    localStorage.setItem('dataBukuTamu', JSON.stringify(dataBukuTamu));
                     updateDataCounter();
                     displayData();
                 }
@@ -618,7 +473,6 @@
                 if (dataBukuTamu.length === 0) { alert('Tidak ada data untuk dihapus.'); return; }
                 if (confirm('Yakin ingin menghapus SEMUA data?')) {
                     dataBukuTamu = [];
-                    localStorage.setItem('dataBukuTamu', JSON.stringify(dataBukuTamu));
                     updateDataCounter();
                     displayData();
                 }
