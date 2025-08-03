@@ -1,43 +1,4 @@
-<script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function filledCell(cell) {
-          return cell !== '' && cell != null;
-        }
-        function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
-
-                // Convert sheet to JSON to filter blank rows
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-                var headerRowIndex = filteredData.findIndex((row, index) =>
-                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                );
-                // Fallback
-                if (headerRowIndex === -1 || headerRowIndex > 25) {
-                  headerRowIndex = 0;
-                }
-
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error(e);
-                return "";
-            }
-        }
-        return gk_fileData[filename] || "";
-        }
-        </script><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="utf-8" />
@@ -100,135 +61,176 @@
         #btnClearAll { background: #dc3545; color: white; }
         #btnSimpan { font-size: 18px; width: 100%; padding: 12px; background: #28a745; color: white; }
         #btnAddToHomeScreen { background: #ff9500; color: white; margin-top: 10px; }
+        #loadingMessage {
+            text-align: center;
+            font-size: 18px;
+            color: #333;
+            margin-top: 50px;
+        }
     </style>
 </head>
 <body>
-    <h1>BUKU TAMU INSPEKTORAT DAERAH</h1>
-    <div style="margin-bottom: 20px; display: flex; gap: 10px;">
-        <button type="button" id="btnForm">📝 Form Input</button>
-        <button type="button" id="btnData">📊 Lihat Data (<span id="dataCount">0</span>)</button>
-        <button type="button" id="btnExport">💾 Export Data</button>
-    </div>
-    <div id="installPrompt" class="warning hidden">
-        Tambahkan aplikasi ini ke layar utama untuk akses lebih cepat!
-        <button id="btnAddToHomeScreen">📱 Tambah ke Layar Utama</button>
-    </div>
-    <div id="formSection">
-        <form id="bukuTamuForm" onsubmit="return false;">
-            <label>Nama: <span class="required">*</span></label>
-            <input id="nama" required type="text" /><br /><br />
-            <label>INSTANSI/ASAL: <span class="required">*</span></label>
-            <select id="asal" required>
-                <option value="">-- Pilih Asal --</option>
-                <option value="INSTANSI">INSTANSI/UNIT KERJA</option>
-                <option value="MASYARAKAT">MASYARAKAT</option>
-            </select><br /><br />
-            <div class="hidden" id="daftarInstansi">
-                <label>DAFTAR INSTANSI/UNIT KERJA: <span class="required">*</span></label>
-                <select id="instansi">
-                    <option value="">-- Pilih Instansi --</option>
-                    <option>SEKRETARIAT DAERAH</option>
-                    <option>SEKRETARIAT DPRD</option>
-                    <option>BADAN PERENCANAAN PEMBANGUNAN DAERAH</option>
-                    <option>BADAN PENGELOLAAN KEUANGAN DAN ASET DAERAH</option>
-                    <option>BADAN PENGELOLAAN PAJAK DAN RETRIBUSI DAERAH</option>
-                    <option>BADAN KEPEGAWAIAN DAN PENGEMBANGAN SUMBER DAYA MANUSIA</option>
-                    <option>BADAN KESATUAN BANGSA DAN POLITIK DAERAH</option>
-                    <option>BADAN PENANGGULANGAN BENCANA DAERAH</option>
-                    <option>DINAS LINGKUNGAN HIDUP</option>
-                    <option>DINAS KESEHATAN</option>
-                    <option>DINAS KEPENDUDUKAN DAN PENCATATAN SIPIL</option>
-                    <option>DINAS KOPERASI, UMKM, PERINDUSTRIAN DAN PERDAGANGAN</option>
-                    <option>DINAS SOSIAL</option>
-                    <option>DINAS PEMUDA, OLAHRAGA DAN PARIWISATA</option>
-                    <option>DINAS KOMUNIKASI DAN INFORMATIKA</option>
-                    <option>DINAS PERUMAHAN, KAWASAN PERMUKIMAN DAN PERTANAHAN</option>
-                    <option>DINAS PENANAMAN MODAL DAN PELAYANAN PERIZINAN TERPADU SATU PINTU</option>
-                    <option>DINAS PENDIDIKAN DAN KEBUDAYAAN</option>
-                    <option>DINAS KETAHANAN PANGAN</option>
-                    <option>DINAS PEMBERDAYAAN MASYARAKAT DAN TIYUH</option>
-                    <option>DINAS PEMBERDAYAAN PEREMPUAN DAN PERLINDUNGAN ANAK</option>
-                    <option>DINAS PENGENDALIAN PENDUDUK DAN KELUARGA BERENCANA</option>
-                    <option>DINAS PERHUBUNGAN</option>
-                    <option>DINAS PERTANIAN</option>
-                    <option>DINAS PETERNAKAN DAN KESEHATAN HEWAN</option>
-                    <option>DINAS PEKERJAAN UMUM DAN PENATAAN RUANG</option>
-                    <option>DINAS TENAGA KERJA DAN TRANSMIGRASI</option>
-                    <option>DINAS PERIKANAN</option>
-                    <option>DINAS PERPUSTAKAAN DAN KEARSIPAN</option>
-                    <option>DINAS PEMADAM KEBAKARAN DAN PENYELAMATAN</option>
-                    <option>SATUAN POLISI PAMONG PRAJA</option>
-                    <option>BADAN PENGAWASAN KEUANGAN DAN PEMBANGUNAN (BPKP)</option>
-                    <option>LAINNYA</option>
-                </select><br /><br />
-            </div>
-            <div class="hidden" id="daftarMasyarakat">
-                <label>Kecamatan: <span class="required">*</span></label>
-                <select id="kecamatan">
-                    <option value="">-- Pilih Kecamatan --</option>
-                    <option value="Tulang Bawang Tengah">Tulang Bawang Tengah</option>
-                    <option value="Tulang Bawang Udik">Tulang Bawang Udik</option>
-                    <option value="Gunung Terang">Gunung Terang</option>
-                    <option value="Gunung Agung">Gunung Agung</option>
-                    <option value="Lambu Kibang">Lambu Kibang</option>
-                    <option value="Way Kenanga">Way Kenanga</option>
-                    <option value="Tumijajar">Tumijajar</option>
-                    <option value="Pagar Dewa">Pagar Dewa</option>
-                    <option value="Batu Putih">Batu Putih</option>
-                </select><br /><br />
-                <label>Desa/Tiyuh: <span class="required">*</span></label>
-                <select id="desa">
-                    <option value="">-- Pilih Desa --</option>
-                </select><br /><br />
-            </div>
-            <label>PIHAK YANG DITEMUI: <span class="required">*</span></label>
-            <select id="pihakDitemui" required>
-                <option value="">-- Pilih Pihak yang Ditemui --</option>
-                <option>INSPEKTUR</option>
-                <option>SEKRETARIS</option>
-                <option>IRBANSUS</option>
-                <option>IRBAN 1</option>
-                <option>IRBAN 2</option>
-                <option>IRBAN 3</option>
-                <option>IRBAN 4</option>
-            </select><br /><br />
-            <label>JENIS LAYANAN: <span class="required">*</span></label>
-            <select id="jenisLayanan" required>
-                <option value="">-- Pilih Jenis Layanan --</option>
-                <option>Permintaan Audit/Klarifikasi Khusus</option>
-                <option>Penanganan Pengaduan</option>
-                <option>Layanan Informasi Publik</option>
-                <option>Pembinaan & Konsultasi</option>
-                <option>Audit</option>
-                <option>Review</option>
-                <option>Evaluasi/Monitoring</option>
-                <option>Tindak Lanjut Temuan</option>
-            </select><br /><br />
-            <label>URAIAN: <span class="required">*</span></label>
-            <input id="uraian" required type="text" /><br /><br />
-            <label>NOMOR HP: <span class="required">*</span></label>
-            <input id="nomorHp" inputmode="numeric" pattern="\d*" required type="text" /><br /><br />
-            <label>Tanda Tangan: <span class="required">*</span></label>
-            <div class="warning hidden" id="signatureWarning">⚠️ Tanda tangan wajib diisi!</div>
-            <canvas id="signature-pad" style="border:1px solid #ccc; width: 100%; border-radius: 4px;"></canvas><br />
-            <button type="button" id="btnClearSignature" style="margin-top: 5px;">🧹 Bersihkan</button><br /><br />
-            <label>Foto: <span class="required">*</span></label>
-            <div class="warning hidden" id="photoWarning">⚠️ Foto wajib diambil atau diunggah!</div>
-            <video id="video" width="300" height="225" autoplay muted playsinline style="border:1px solid #ccc;"></video><br />
-            <canvas id="canvas" width="300" height="225" style="display:none;"></canvas>
-            <button type="button" id="btnAmbilFoto" style="margin-top: 10px;">📸 Ambil Foto</button>
-            <input type="file" id="fotoUpload" accept="image/*" style="margin-top: 10px;" /><br /><br />
-            <img id="previewFoto" style="width:300px;display:none;border:1px solid #ccc;margin-bottom:10px;" alt="Hasil Foto">
-            <button type="button" id="btnSimpan">💾 Simpan Data</button>
-        </form>
-    </div>
-    <div id="dataSection" class="hidden">
-        <h2>📊 DATA BUKU TAMU</h2>
-        <div style="margin-bottom: 20px;">
-            <button type="button" id="btnClearAll">🗑️ Hapus Semua Data</button>
+    <div id="mainContent">
+        <h1>BUKU TAMU INSPEKTORAT DAERAH</h1>
+        <div style="margin-bottom: 20px; display: flex; gap: 10px;">
+            <button type="button" id="btnForm">📝 Form Input</button>
+            <button type="button" id="btnData">📊 Lihat Data (<span id="dataCount">0</span>)</button>
+            <button type="button" id="btnExport">💾 Export Data</button>
         </div>
-        <div id="dataContainer"></div>
+        <div id="installPrompt" class="warning hidden">
+            Tambahkan aplikasi ini ke layar utama untuk akses lebih cepat!
+            <button id="btnAddToHomeScreen">📱 Tambah ke Layar Utama</button>
+        </div>
+        <div id="formSection">
+            <form id="bukuTamuForm" onsubmit="return false;">
+                <label>Nama: <span class="required">*</span></label>
+                <input id="nama" required type="text" /><br /><br />
+                <label>INSTANSI/ASAL: <span class="required">*</span></label>
+                <select id="asal" required>
+                    <option value="">-- Pilih Asal --</option>
+                    <option value="INSTANSI">INSTANSI/UNIT KERJA</option>
+                    <option value="MASYARAKAT">MASYARAKAT</option>
+                </select><br /><br />
+                <div class="hidden" id="daftarInstansi">
+                    <label>DAFTAR INSTANSI/UNIT KERJA: <span class="required">*</span></label>
+                    <select id="instansi">
+                        <option value="">-- Pilih Instansi --</option>
+                        <option>SEKRETARIAT DAERAH</option>
+                        <option>SEKRETARIAT DPRD</option>
+                        <option>BADAN PERENCANAAN PEMBANGUNAN DAERAH</option>
+                        <option>BADAN PENGELOLAAN KEUANGAN DAN ASET DAERAH</option>
+                        <option>BADAN PENGELOLAAN PAJAK DAN RETRIBUSI DAERAH</option>
+                        <option>BADAN KEPEGAWAIAN DAN PENGEMBANGAN SUMBER DAYA MANUSIA</option>
+                        <option>BADAN KESATUAN BANGSA DAN POLITIK DAERAH</option>
+                        <option>BADAN PENANGGULANGAN BENCANA DAERAH</option>
+                        <option>DINAS LINGKUNGAN HIDUP</option>
+                        <option>DINAS KESEHATAN</option>
+                        <option>DINAS KEPENDUDUKAN DAN PENCATATAN SIPIL</option>
+                        <option>DINAS KOPERASI, UMKM, PERINDUSTRIAN DAN PERDAGANGAN</option>
+                        <option>DINAS SOSIAL</option>
+                        <option>DINAS PEMUDA, OLAHRAGA DAN PARIWISATA</option>
+                        <option>DINAS KOMUNIKASI DAN INFORMATIKA</option>
+                        <option>DINAS PERUMAHAN, KAWASAN PERMUKIMAN DAN PERTANAHAN</option>
+                        <option>DINAS PENANAMAN MODAL DAN PELAYANAN PERIZINAN TERPADU SATU PINTU</option>
+                        <option>DINAS PENDIDIKAN DAN KEBUDAYAAN</option>
+                        <option>DINAS KETAHANAN PANGAN</option>
+                        <option>DINAS PEMBERDAYAAN MASYARAKAT DAN TIYUH</option>
+                        <option>DINAS PEMBERDAYAAN PEREMPUAN DAN PERLINDUNGAN ANAK</option>
+                        <option>DINAS PENGENDALIAN PENDUDUK DAN KELUARGA BERENCANA</option>
+                        <option>DINAS PERHUBUNGAN</option>
+                        <option>DINAS PERTANIAN</option>
+                        <option>DINAS PETERNAKAN DAN KESEHATAN HEWAN</option>
+                        <option>DINAS PEKERJAAN UMUM DAN PENATAAN RUANG</option>
+                        <option>DINAS TENAGA KERJA DAN TRANSMIGRASI</option>
+                        <option>DINAS PERIKANAN</option>
+                        <option>DINAS PERPUSTAKAAN DAN KEARSIPAN</option>
+                        <option>DINAS PEMADAM KEBAKARAN DAN PENYELAMATAN</option>
+                        <option>SATUAN POLISI PAMONG PRAJA</option>
+                        <option>BADAN PENGAWASAN KEUANGAN DAN PEMBANGUNAN (BPKP)</option>
+                        <option>LAINNYA</option>
+                    </select><br /><br />
+                </div>
+                <div class="hidden" id="daftarMasyarakat">
+                    <label>Kecamatan: <span class="required">*</span></label>
+                    <select id="kecamatan">
+                        <option value="">-- Pilih Kecamatan --</option>
+                        <option value="Tulang Bawang Tengah">Tulang Bawang Tengah</option>
+                        <option value="Tulang Bawang Udik">Tulang Bawang Udik</option>
+                        <option value="Gunung Terang">Gunung Terang</option>
+                        <option value="Gunung Agung">Gunung Agung</option>
+                        <option value="Lambu Kibang">Lambu Kibang</option>
+                        <option value="Way Kenanga">Way Kenanga</option>
+                        <option value="Tumijajar">Tumijajar</option>
+                        <option value="Pagar Dewa">Pagar Dewa</option>
+                        <option value="Batu Putih">Batu Putih</option>
+                    </select><br /><br />
+                    <label>Desa/Tiyuh: <span class="required">*</span></label>
+                    <select id="desa">
+                        <option value="">-- Pilih Desa --</option>
+                    </select><br /><br />
+                </div>
+                <label>PIHAK YANG DITEMUI: <span class="required">*</span></label>
+                <select id="pihakDitemui" required>
+                    <option value="">-- Pilih Pihak yang Ditemui --</option>
+                    <option>INSPEKTUR</option>
+                    <option>SEKRETARIS</option>
+                    <option>IRBANSUS</option>
+                    <option>IRBAN 1</option>
+                    <option>IRBAN 2</option>
+                    <option>IRBAN 3</option>
+                    <option>IRBAN 4</option>
+                </select><br /><br />
+                <label>JENIS LAYANAN: <span class="required">*</span></label>
+                <select id="jenisLayanan" required>
+                    <option value="">-- Pilih Jenis Layanan --</option>
+                    <option>Permintaan Audit/Klarifikasi Khusus</option>
+                    <option>Penanganan Pengaduan</option>
+                    <option>Layanan Informasi Publik</option>
+                    <option>Pembinaan & Konsultasi</option>
+                    <option>Audit</option>
+                    <option>Review</option>
+                    <option>Evaluasi/Monitoring</option>
+                    <option>Tindak Lanjut Temuan</option>
+                </select><br /><br />
+                <label>URAIAN: <span class="required">*</span></label>
+                <input id="uraian" required type="text" /><br /><br />
+                <label>NOMOR HP: <span class="required">*</span></label>
+                <input id="nomorHp" inputmode="numeric" pattern="\d*" required type="text" /><br /><br />
+                <label>Tanda Tangan: <span class="required">*</span></label>
+                <div class="warning hidden" id="signatureWarning">⚠️ Tanda tangan wajib diisi!</div>
+                <canvas id="signature-pad" style="border:1px solid #ccc; width: 100%; border-radius: 4px;"></canvas><br />
+                <button type="button" id="btnClearSignature" style="margin-top: 5px;">🧹 Bersihkan</button><br /><br />
+                <label>Foto: <span class="required">*</span></label>
+                <div class="warning hidden" id="photoWarning">⚠️ Foto wajib diambil atau diunggah!</div>
+                <video id="video" width="300" height="225" autoplay muted playsinline style="border:1px solid #ccc;"></video><br />
+                <canvas id="canvas" width="300" height="225" style="display:none;"></canvas>
+                <button type="button" id="btnAmbilFoto" style="margin-top: 10px;">📸 Ambil Foto</button>
+                <input type="file" id="fotoUpload" accept="image/*" style="margin-top: 10px;" /><br /><br />
+                <img id="previewFoto" style="width:300px;display:none;border:1px solid #ccc;margin-bottom:10px;" alt="Hasil Foto">
+                <button type="button" id="btnSimpan">💾 Simpan Data</button>
+            </form>
+        </div>
+        <div id="dataSection" class="hidden">
+            <h2>📊 DATA BUKU TAMU</h2>
+            <div style="margin-bottom: 20px;">
+                <button type="button" id="btnClearAll">🗑️ Hapus Semua Data</button>
+            </div>
+            <div id="dataContainer"></div>
+        </div>
     </div>
+    <div id="loadingMessage" class="hidden">Memproses instalasi ke layar utama...</div>
+    <script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+            return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+            if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+                try {
+                    var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                    var firstSheetName = workbook.SheetNames[0];
+                    var worksheet = workbook.Sheets[firstSheetName];
+                    var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                    var filteredData = jsonData.filter(row => row.some(filledCell));
+                    var headerRowIndex = filteredData.findIndex((row, index) =>
+                        row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                    );
+                    if (headerRowIndex === -1 || headerRowIndex > 25) {
+                        headerRowIndex = 0;
+                    }
+                    var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex));
+                    csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                    return csv;
+                } catch (e) {
+                    console.error(e);
+                    return "";
+                }
+            }
+            return gk_fileData[filename] || "";
+        }
+    </script>
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/coba3/service-worker.js')
@@ -261,6 +263,8 @@
             const btnAmbilFoto = document.getElementById('btnAmbilFoto');
             const btnAddToHomeScreen = document.getElementById('btnAddToHomeScreen');
             const installPromptDiv = document.getElementById('installPrompt');
+            const mainContent = document.getElementById('mainContent');
+            const loadingMessage = document.getElementById('loadingMessage');
 
             let drawing = false;
             let hasSignature = false;
@@ -280,8 +284,16 @@
 
             btnAddToHomeScreen.addEventListener('click', () => {
                 if (deferredPrompt) {
+                    // Hide main content and show loading message
+                    mainContent.classList.add('hidden');
+                    loadingMessage.classList.remove('hidden');
+                    
                     deferredPrompt.prompt();
                     deferredPrompt.userChoice.then((choiceResult) => {
+                        // Restore UI regardless of user choice
+                        mainContent.classList.remove('hidden');
+                        loadingMessage.classList.add('hidden');
+                        
                         if (choiceResult.outcome === 'accepted') {
                             console.log('User menambahkan aplikasi ke layar utama');
                         } else {
@@ -294,8 +306,10 @@
             });
 
             // Hide prompt if app is already installed
-            window.addEventListener('appinstalled', () => {
+            window.add хорошее настроениеEventListener('appinstalled', () => {
                 console.log('Aplikasi telah diinstal ke layar utama');
+                mainContent.classList.remove('hidden');
+                loadingMessage.classList.add('hidden');
                 installPromptDiv.classList.add('hidden');
             });
 
@@ -560,7 +574,7 @@
                                 <p><strong>Uraian:</strong> ${data.uraian}</p>
                                 ${data.instansi ? `<p><strong>Instansi:</strong> ${data.instansi}</p>` : ''}
                                 ${data.kecamatan ? `<p><strong>Kec./Desa:</strong> ${data.kecamatan}, ${data.desa}</p>` : ''}
-                                <div style="display: flex; gap: 20px; margin-top: 15px; flex-wrap: wrap;">
+                                <div style="display: flex; gap: 20px; margin-top:  gré15px; flex-wrap: wrap;">
                                     <div><strong>Tanda Tangan:</strong><br><img src="${data.tandaTangan}" style="border: 1px solid #ccc; max-width: 200px;"></div>
                                     <div><strong>Foto:</strong><br><img src="${data.foto}" style="border: 1px solid #ccc; max-width: 200px;"></div>
                                 </div>
