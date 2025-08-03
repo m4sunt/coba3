@@ -4,7 +4,6 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#007bff" />
-    <!-- iOS -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="BukuTamu" />
@@ -138,7 +137,7 @@
                     <option value="">-- Pilih Desa --</option>
                 </select><br /><br />
             </div>
-            <label>PIHAK YANG'de DITEMUI: <span class="required">*</span></label>
+            <label>PIHAK YANG DITEMUI: <span class="required">*</span></label>
             <select id="pihakDitemui" required>
                 <option value="">-- Pilih Pihak yang Ditemui --</option>
                 <option>INSPEKTUR</option>
@@ -170,10 +169,11 @@
             <canvas id="signature-pad" style="border:1px solid #ccc; width: 100%; border-radius: 4px;"></canvas><br />
             <button type="button" id="btnClearSignature" style="margin-top: 5px;">🧹 Bersihkan</button><br /><br />
             <label>Foto: <span class="required">*</span></label>
-            <div class="warning hidden" id="photoWarning">⚠️ Foto wajib diambil!</div>
+            <div class="warning hidden" id="photoWarning">⚠️ Foto wajib diambil atau diunggah!</div>
             <video id="video" width="300" height="225" autoplay muted playsinline style="border:1px solid #ccc;"></video><br />
             <canvas id="canvas" width="300" height="225" style="display:none;"></canvas>
-            <button type="button" id="btnAmbilFoto" style="margin-top: 10px;">📸 Ambil Foto</button><br /><br />
+            <button type="button" id="btnAmbilFoto" style="margin-top: 10px;">📸 Ambil Foto</button>
+            <input type="file" id="fotoUpload" accept="image/*" style="margin-top: 10px;" /><br /><br />
             <img id="previewFoto" style="width:300px;display:none;border:1px solid #ccc;margin-bottom:10px;" alt="Hasil Foto">
             <button type="button" id="btnSimpan">💾 Simpan Data</button>
         </form>
@@ -206,6 +206,7 @@
             const video = document.getElementById('video');
             const photoCanvas = document.getElementById('canvas');
             const previewFoto = document.getElementById('previewFoto');
+            const fotoUpload = document.getElementById('fotoUpload');
 
             const btnForm = document.getElementById('btnForm');
             const btnData = document.getElementById('btnData');
@@ -218,14 +219,15 @@
             let drawing = false;
             let hasSignature = false;
             let hasPhoto = false;
-            let dataBukuTamu = [];
+            let dataBukuTamu = JSON.parse(localStorage.getItem('dataBukuTamu') || '[]');
+
+            // Update data counter on load
+            updateDataCounter();
 
             // === DATA LENGKAP UNTUK DESA ===
             const dataDesa = {
                 "Lambu Kibang": ["Kibang Budi Jaya", "Lesung Bhakti Jaya", "Mekar Sari Jaya", "Pagar Jaya", "Gunung Sari", "Sumber Rejo", "Kibang Yekti Jaya", "Kibang Tri Jaya", "Gilang Tunggal Makarta", "Kibang Mulya Jaya"],
-                "Tulang Bawang Tengah": ["Penumangan", "Penumangan Baru", "Menggala Mas", "Bandar Dewa", "Panaragan", "Panaragan Jaya Indah", "Panaragan Jaya Utama", "Tirta Kencana", "Tirta Makmur", "Pulung Kencana", "Mulya Jaya", "M
-
-ulya Kencana", "Candra Mukti", "Candra Kencana", "Candra Jaya", "Tunas Asri", "Wonokerto", "Mekar Asri", "Marga Asri"],
+                "Tulang Bawang Tengah": ["Penumangan", "Penumangan Baru", "Menggala Mas", "Bandar Dewa", "Panaragan", "Panaragan Jaya Indah", "Panaragan Jaya Utama", "Tirta Kencana", "Tirta Makmur", "Pulung Kencana", "Mulya Jaya", "Mulya Kencana", "Candra Mukti", "Candra Kencana", "Candra Jaya", "Tunas Asri", "Wonokerto", "Mekar Asri", "Marga Asri"],
                 "Gunung Agung": ["Tunas Jaya", "Mulya Jaya", "Mulya Sari", "Mekar Jaya", "Bangun Jaya", "Dwikora Jaya", "Marga Jaya", "Sumber Jaya", "Sumber Rejeki", "Jaya Murni", "Wonorejo", "Suka Jaya", "Tri Jaya Tunggal"],
                 "Tumijajar": ["Murni Jaya", "Daya Asri", "Daya Sakti", "Makarti", "Sumber Rejo", "Margodadi", "Gunung Menanti", "Gunung Timbul", "Margo Mulyo"],
                 "Way Kenanga": ["Agung Jaya", "Mercubuana", "Balam Jaya", "Pagar Buana", "Indraloka I", "Indraloka II", "Balam Asri", "Indraloka Jaya", "Indraloka Mukti", "Sido Agung"],
@@ -258,6 +260,7 @@ ulya Kencana", "Candra Mukti", "Candra Kencana", "Candra Jaya", "Tunas Asri", "W
             asal.addEventListener('change', handleAsalChange);
             kecamatan.addEventListener('change', populateDesa);
             nomorHp.addEventListener('input', () => { nomorHp.value = nomorHp.value.replace(/\D/g, ''); });
+            fotoUpload.addEventListener('change', handlePhotoUpload);
 
             signatureCanvas.addEventListener('mousedown', startDrawing);
             signatureCanvas.addEventListener('mousemove', draw);
@@ -345,18 +348,34 @@ ulya Kencana", "Candra Mukti", "Candra Kencana", "Candra Jaya", "Tunas Asri", "W
                 document.getElementById('signatureWarning').classList.add('hidden');
             }
 
-            navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
-                .then(stream => { video.srcObject = stream; })
-                .catch(err => {
-                    console.error("Kamera Error:", err);
-                    alert("Kamera tidak bisa diakses. Mohon izinkan akses kamera pada browser Anda.");
-                });
+            // Initialize camera with better error handling
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+                    .then(stream => {
+                        video.srcObject = stream;
+                        console.log("Stream kamera berhasil:", stream.getVideoTracks());
+                    })
+                    .catch(err => {
+                        console.error("Kamera Error:", err.name, err.message);
+                        let errorMessage = "Kamera tidak bisa diakses. Mohon izinkan akses kamera pada browser Anda atau unggah foto.";
+                        if (err.name === "NotFoundError") {
+                            errorMessage = "Kamera tidak ditemukan. Pastikan perangkat Anda memiliki kamera aktif atau unggah foto.";
+                        } else if (err.name === "NotAllowedError") {
+                            errorMessage = "Izin kamera ditolak. Mohon izinkan akses kamera di pengaturan browser atau unggah foto.";
+                        } else if (err.name === "NotReadableError") {
+                            errorMessage = "Kamera sedang digunakan oleh aplikasi lain. Tutup aplikasi tersebut dan coba lagi atau unggah foto.";
+                        }
+                        alert(errorMessage);
+                    });
+            } else {
+                alert("Browser Anda tidak mendukung akses kamera. Silakan unggah foto sebagai gantinya.");
+            }
 
             function ambilFoto() {
                 const context = photoCanvas.getContext('2d');
-                photoCanvas.width = video.videoWidth;
-                photoCanvas.height = video.videoHeight;
-                context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+                photoCanvas.width = video.videoWidth || 300;
+                photoCanvas.height = video.videoHeight || 225;
+                context.drawImage(video, 0, 0, photoCanvas.width, photoCanvas.height);
                 previewFoto.src = photoCanvas.toDataURL('image/png');
                 previewFoto.style.display = 'block';
                 hasPhoto = true;
@@ -367,6 +386,20 @@ ulya Kencana", "Candra Mukti", "Candra Kencana", "Candra Jaya", "Tunas Asri", "W
                     btnAmbilFoto.innerHTML = '📸 Ambil Foto';
                     btnAmbilFoto.style.background = '';
                 }, 2000);
+            }
+
+            function handlePhotoUpload(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        previewFoto.src = e.target.result;
+                        previewFoto.style.display = 'block';
+                        hasPhoto = true;
+                        document.getElementById('photoWarning').classList.add('hidden');
+                    };
+                    reader.readAsDataURL(file);
+                }
             }
 
             function simpanData() {
@@ -407,11 +440,12 @@ ulya Kencana", "Candra Mukti", "Candra Kencana", "Candra Jaya", "Tunas Asri", "W
                     uraian: document.getElementById('uraian').value,
                     nomorHp: nomorHp.value,
                     tandaTangan: signatureCanvas.toDataURL('image/png'),
-                    foto: photoCanvas.toDataURL('image/png'),
+                    foto: previewFoto.src,
                     timestamp: new Date().toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' })
                 };
 
                 dataBukuTamu.push(formData);
+                localStorage.setItem('dataBukuTamu', JSON.stringify(dataBukuTamu));
                 updateDataCounter();
                 alert(`✅ Data berhasil disimpan! Total data: ${dataBukuTamu.length}`);
                 resetFormComplete();
@@ -425,6 +459,7 @@ ulya Kencana", "Candra Mukti", "Candra Kencana", "Candra Jaya", "Tunas Asri", "W
                 daftarInstansi.classList.add("hidden");
                 daftarMasyarakat.classList.add("hidden");
                 document.getElementById('nama').focus();
+                fotoUpload.value = '';
             }
 
             function updateDataCounter() {
@@ -464,6 +499,7 @@ ulya Kencana", "Candra Mukti", "Candra Kencana", "Candra Jaya", "Tunas Asri", "W
             window.deleteData = function(index) {
                 if (confirm(`Yakin ingin menghapus data tamu #${index + 1}?`)) {
                     dataBukuTamu.splice(index, 1);
+                    localStorage.setItem('dataBukuTamu', JSON.stringify(dataBukuTamu));
                     updateDataCounter();
                     displayData();
                 }
@@ -473,6 +509,7 @@ ulya Kencana", "Candra Mukti", "Candra Kencana", "Candra Jaya", "Tunas Asri", "W
                 if (dataBukuTamu.length === 0) { alert('Tidak ada data untuk dihapus.'); return; }
                 if (confirm('Yakin ingin menghapus SEMUA data?')) {
                     dataBukuTamu = [];
+                    localStorage.setItem('dataBukuTamu', JSON.stringify(dataBukuTamu));
                     updateDataCounter();
                     displayData();
                 }
