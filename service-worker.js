@@ -1,22 +1,14 @@
+// service-worker.js
+
 self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open('buku-tamu-cache').then(cache => {
-      return cache.addAll([
-        './',
-        './index.html',
-        './manifest.json',
-        './icon-192.png',
-        './icon-512.png'
-        // Tambahkan file CSS, JS, dan lainnya kalau ada
-      ]);
-    })
-  );
+  console.log('✅ Service Worker: Terpasang');
+  self.skipWaiting(); // Langsung aktif setelah install
+});
+
+self.addEventListener('activate', event => {
+  console.log('✅ Service Worker: Aktif');
 });
 
 self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request).then(response => {
-      return response || fetch(event.request);
-    })
-  );
+  // Tidak cache atau override fetch — biarkan default
 });
