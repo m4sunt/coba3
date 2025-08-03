@@ -209,6 +209,7 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             const form = document.getElementById('bukuTamuForm');
+            const formSection = document.getElementById('formSection');
             const asal = document.getElementById("asal");
             const daftarInstansi = document.getElementById("daftarInstansi");
             const daftarMasyarakat = document.getElementById("daftarMasyarakat");
@@ -245,15 +246,17 @@
 
             // Check if app is running in standalone mode (already installed)
             if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+                isAppInstalled = true;
                 enableForm();
+                installPromptDiv.classList.add('hidden');
             }
 
             // Handle Add to Home Screen prompt
             window.addEventListener('beforeinstallprompt', (e) => {
                 e.preventDefault();
                 deferredPrompt = e;
-                installPromptDiv.classList.remove('hidden');
                 if (!isAppInstalled) {
+                    installPromptDiv.classList.remove('hidden');
                     alert("Silakan tambahkan aplikasi ke layar utama untuk mengakses form!");
                 }
             });
@@ -264,17 +267,18 @@
                     deferredPrompt.userChoice.then((choiceResult) => {
                         if (choiceResult.outcome === 'accepted') {
                             console.log('User menambahkan aplikasi ke layar utama');
+                            isAppInstalled = true;
                             enableForm();
+                            installPromptDiv.classList.add('hidden');
                         } else {
                             console.log('User membatalkan penambahan ke layar utama');
                         }
                         deferredPrompt = null;
-                        installPromptDiv.classList.add('hidden');
                     });
                 }
             });
 
-            // Enable form when app is installed
+            // Hide prompt when app is installed
             window.addEventListener('appinstalled', () => {
                 console.log('Aplikasi telah diinstal ke layar utama');
                 isAppInstalled = true;
