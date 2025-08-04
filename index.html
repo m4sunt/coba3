@@ -574,13 +574,32 @@
             }
         });
     </script>
-<!-- Tombol mengambang tetap terlihat -->
-<button id="btnInstallPWA" style="position: fixed; bottom: 20px; right: 20px; z-index: 99999; background: #28a745; color: white; border: none; border-radius: 8px; padding: 12px 18px; font-size: 16px;">
+<!-- Tombol "Tambahkan ke Layar Utama" -->
+<button id="btnInstallPWA" style="
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 99999;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 18px;
+  font-size: 16px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+">
   📲 Tambahkan ke Layar Utama
 </button>
 
-<!-- Layar putih transparan menutup isi halaman -->
-<div id="lockLayer" style="display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.95); z-index: 9999;">
+<!-- Layar Putih Transparan yang Menutupi Seluruh Halaman -->
+<div id="lockLayer" style="
+  position: fixed;
+  inset: 0;
+  background: rgba(255,255,255,0.95);
+  z-index: 9999;
+  display: none;
+">
 </div>
 
 <script>
@@ -590,35 +609,32 @@
     return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
   }
 
-  // Cegah penggunaan jika bukan dari layar utama
-  function blokirHalamanJikaBukanPWA() {
+  function tampilkanBlokirJikaBelumPWA() {
     const lock = document.getElementById("lockLayer");
-    const tombolInstall = document.getElementById("btnInstallPWA");
+    const tombol = document.getElementById("btnInstallPWA");
 
     if (!isInStandaloneMode()) {
+      // Tampilkan layar blokir dan tombol install
       lock.style.display = 'block';
-      tombolInstall.style.display = 'block';
+      tombol.style.display = 'block';
 
-      // Nonaktifkan semua input agar tidak bisa diisi
-      const elemen = document.querySelectorAll('input, select, button, canvas, textarea');
+      // Nonaktifkan semua input dan tombol
+      const elemen = document.querySelectorAll('input, select, textarea, button, canvas, video');
       elemen.forEach(el => {
-        if (el.id === 'btnInstallPWA') return; // Jangan blok tombol
-        if (el.tagName === 'CANVAS') {
+        if (el.id === 'btnInstallPWA') return; // tombol tetap aktif
+        el.disabled = true;
+        if (el.tagName === 'CANVAS' || el.tagName === 'VIDEO') {
           el.style.pointerEvents = 'none';
           el.style.opacity = '0.3';
-        } else {
-          el.disabled = true;
         }
       });
     } else {
       lock.style.display = 'none';
-      tombolInstall.style.display = 'none';
+      tombol.style.display = 'none';
     }
   }
 
-  window.addEventListener('DOMContentLoaded', blokirHalamanJikaBukanPWA);
-
-  // Simpan event install yang tertunda
+  // Simpan event install ketika tersedia
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
@@ -626,7 +642,7 @@
     tombol.style.display = 'block';
   });
 
-  // Klik tombol install
+  // Klik tombol: tampilkan prompt install
   document.getElementById("btnInstallPWA").addEventListener("click", async () => {
     if (deferredPrompt) {
       deferredPrompt.prompt();
@@ -637,9 +653,12 @@
       }
       deferredPrompt = null;
     } else {
-      alert("Silakan gunakan menu browser → Tambahkan ke layar utama.");
+      alert("📌 Jika tidak muncul, buka menu browser lalu pilih 'Tambahkan ke layar utama'.");
     }
   });
+
+  // Jalankan blokir setelah semua elemen dimuat
+  window.addEventListener("DOMContentLoaded", tampilkanBlokirJikaBelumPWA);
 </script>
 
 </body>
