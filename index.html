@@ -574,7 +574,7 @@
             }
         });
     </script>
-<!-- Tombol "Tambahkan ke Layar Utama" -->
+<!-- Tombol Tambahkan ke Layar Utama -->
 <button id="btnInstallPWA" style="
   display: none;
   position: fixed;
@@ -592,7 +592,7 @@
   📲 Tambahkan ke Layar Utama
 </button>
 
-<!-- Layar Putih Transparan yang Menutupi Seluruh Halaman -->
+<!-- Layar Putih Transparan Penutup -->
 <div id="lockLayer" style="
   position: fixed;
   inset: 0;
@@ -609,19 +609,34 @@
     return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
   }
 
-  function tampilkanBlokirJikaBelumPWA() {
+  function aktifkanKamera() {
+    const video = document.getElementById('video');
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+        .then(stream => {
+          video.srcObject = stream;
+          console.log("✅ Kamera aktif otomatis");
+        })
+        .catch(err => {
+          console.error("Kamera Error:", err.name, err.message);
+        });
+    } else {
+      console.warn("Browser tidak mendukung kamera.");
+    }
+  }
+
+  function blokirJikaBelumPWA() {
     const lock = document.getElementById("lockLayer");
     const tombol = document.getElementById("btnInstallPWA");
 
     if (!isInStandaloneMode()) {
-      // Tampilkan layar blokir dan tombol install
       lock.style.display = 'block';
       tombol.style.display = 'block';
 
-      // Nonaktifkan semua input dan tombol
+      // Nonaktifkan semua input & elemen interaktif
       const elemen = document.querySelectorAll('input, select, textarea, button, canvas, video');
       elemen.forEach(el => {
-        if (el.id === 'btnInstallPWA') return; // tombol tetap aktif
+        if (el.id === 'btnInstallPWA') return;
         el.disabled = true;
         if (el.tagName === 'CANVAS' || el.tagName === 'VIDEO') {
           el.style.pointerEvents = 'none';
@@ -631,18 +646,18 @@
     } else {
       lock.style.display = 'none';
       tombol.style.display = 'none';
+      aktifkanKamera(); // 🎯 Kamera otomatis aktif saat buka dari home screen
     }
   }
 
-  // Simpan event install ketika tersedia
+  // Simpan event install
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
-    const tombol = document.getElementById("btnInstallPWA");
-    tombol.style.display = 'block';
+    document.getElementById("btnInstallPWA").style.display = 'block';
   });
 
-  // Klik tombol: tampilkan prompt install
+  // Klik tombol install
   document.getElementById("btnInstallPWA").addEventListener("click", async () => {
     if (deferredPrompt) {
       deferredPrompt.prompt();
@@ -650,15 +665,18 @@
       if (hasil.outcome === "accepted") {
         document.getElementById("lockLayer").style.display = "none";
         document.getElementById("btnInstallPWA").style.display = "none";
+
+        // Aktifkan kamera langsung tanpa refresh
+        aktifkanKamera();
       }
       deferredPrompt = null;
     } else {
-      alert("📌 Jika tidak muncul, buka menu browser lalu pilih 'Tambahkan ke layar utama'.");
+      alert("📌 Silakan tambahkan dari menu browser → 'Tambahkan ke layar utama'.");
     }
   });
 
-  // Jalankan blokir setelah semua elemen dimuat
-  window.addEventListener("DOMContentLoaded", tampilkanBlokirJikaBelumPWA);
+  window.addEventListener("DOMContentLoaded", blokirJikaBelumPWA);
+</script>
 </script>
 
 </body>
