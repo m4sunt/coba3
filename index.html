@@ -574,106 +574,51 @@
             }
         });
     </script>
-<div id="installPrompt" style="display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#fff; padding:15px 20px; border:1px solid #ccc; border-radius:10px; box-shadow:0 5px 15px rgba(0,0,0,0.3); z-index:9999;">
-    <p style="margin:0 0 10px 0;">⚠️ Tambahkan aplikasi ke layar utama untuk menggunakan</p>
-    <button id="btnInstall" style="padding:10px 15px; background:#28a745; color:#fff; border:none; border-radius:5px;">📲 Tambahkan ke Layar Utama</button>
-</div>
-<div id="lockScreen" style="position:fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:9998; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:bold;">
-    Mohon tambahkan ke layar utama untuk menggunakan aplikasi ini.
-</div>
-
 <script>
-let deferredPrompt;
-const installPrompt = document.getElementById('installPrompt');
-const btnInstall = document.getElementById('btnInstall');
-const lockScreen = document.getElementById('lockScreen');
-
-// Cek jika bukan dari mode standalone (web biasa)
-function isInStandaloneMode() {
-    return (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true);
-}
-
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    if (!isInStandaloneMode()) {
-        installPrompt.style.display = 'block';
-        lockScreen.style.display = 'flex';
+    // Cek apakah aplikasi dijalankan dari home screen (standalone mode)
+    function isInStandaloneMode() {
+        return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
     }
-});
 
-btnInstall.addEventListener('click', async () => {
-    if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-            installPrompt.style.display = 'none';
-            lockScreen.style.display = 'none';
+    // Fungsi kunci interaksi jika belum standalone
+    function kunciFormJikaBukanStandalone() {
+        if (!isInStandaloneMode()) {
+            // Nonaktifkan semua input dan tombol dalam form
+            const formElemen = document.querySelectorAll('#bukuTamuForm input, #bukuTamuForm select, #bukuTamuForm button, #bukuTamuForm canvas');
+            formElemen.forEach(el => {
+                if (el.tagName === 'CANVAS') {
+                    el.style.pointerEvents = 'none';
+                    el.style.opacity = '0.3';
+                } else {
+                    el.disabled = true;
+                }
+            });
+
+            // Tambahkan overlay agar jelas tidak bisa dipakai
+            const blocker = document.createElement('div');
+            blocker.style.position = 'fixed';
+            blocker.style.top = '0';
+            blocker.style.left = '0';
+            blocker.style.width = '100%';
+            blocker.style.height = '100%';
+            blocker.style.background = 'rgba(255,255,255,0.95)';
+            blocker.style.zIndex = '9999';
+            blocker.style.display = 'flex';
+            blocker.style.flexDirection = 'column';
+            blocker.style.alignItems = 'center';
+            blocker.style.justifyContent = 'center';
+            blocker.innerHTML = `
+                <div style="text-align: center; padding: 20px;">
+                    <h2 style="color: #dc3545;">⚠️ Aplikasi Belum Ditambahkan ke Layar Utama</h2>
+                    <p>Silakan tambahkan aplikasi ini ke layar utama untuk menggunakan fitur pengisian data.</p>
+                </div>
+            `;
+            document.body.appendChild(blocker);
         }
-        deferredPrompt = null;
     }
-});
 
-// Jika sudah dalam mode standalone, hapus lockscreen
-window.addEventListener('DOMContentLoaded', () => {
-    if (isInStandaloneMode()) {
-        installPrompt.style.display = 'none';
-        lockScreen.style.display = 'none';
-    }
-});
-// 🔒 Blokir interaksi jika belum dibuka dari layar utama (PWA mode)
-function disableInteraction() {
-    const allInputs = document.querySelectorAll('input, select, button, textarea, canvas');
-    allInputs.forEach(el => {
-        el.disabled = true;
-        el.style.pointerEvents = 'none';
-        el.style.opacity = 0.5;
-    });
-}
-
-// ✅ Aktifkan kembali jika dibuka dari PWA
-function enableInteraction() {
-    const allInputs = document.querySelectorAll('input, select, button, textarea, canvas');
-    allInputs.forEach(el => {
-        el.disabled = false;
-        el.style.pointerEvents = '';
-        el.style.opacity = '';
-    });
-}
-
-function isInStandaloneMode() {
-    return (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true);
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    if (!isInStandaloneMode()) {
-        disableInteraction();
-        document.getElementById('installPrompt').style.display = 'block';
-        document.getElementById('lockScreen').style.display = 'flex';
-    } else {
-        enableInteraction();
-        document.getElementById('installPrompt').style.display = 'none';
-btnInstall.addEventListener('click', async () => {
-    if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-            // ✅ Tandai bahwa pengguna sudah menekan tombol
-            localStorage.setItem('installClicked', 'true');
-
-            // 🔒 Kunci halaman sementara sampai dibuka dari layar utama
-            installPrompt.innerHTML = "<p>✅ Berhasil ditambahkan! Silakan buka dari layar utama.</p>";
-            lockScreen.style.display = 'flex';
-            disableInteraction();
-        }
-        deferredPrompt = null;
-    }
-});
-
-        document.getElementById('lockScreen').style.display = 'none';
-    }
-});
-
+    // Jalankan saat halaman siap
+    window.addEventListener('DOMContentLoaded', kunciFormJikaBukanStandalone);
 </script>
 
 </body>
