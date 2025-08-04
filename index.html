@@ -278,6 +278,37 @@
             let dataBukuTamu = JSON.parse(localStorage.getItem('dataBukuTamu') || '[]');
             let deferredPrompt = null;
             let isAppInstalled = false;
+if (!isAppInstalled) {
+    document.body.innerHTML = `
+        <div style="text-align:center;padding:40px;">
+            <h2>🔒 Akses Terkunci</h2>
+            <p>Tambahkan aplikasi ke layar utama untuk mengakses halaman ini.</p>
+            <button id="btnBukaPrompt" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px;">📲 Tambahkan Sekarang</button>
+        </div>
+    `;
+
+    document.getElementById('btnBukaPrompt').addEventListener('click', () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then((choiceResult) => {
+                if (choiceResult.outcome === 'accepted') {
+                    alert("✅ Aplikasi berhasil ditambahkan.\nTutup tab ini lalu buka dari layar utama.");
+                    try {
+                        window.open('', '_self');
+                        window.close();
+                    } catch {
+                        alert("🔒 Harap tutup tab ini secara manual.");
+                    }
+                } else {
+                    alert("❌ Anda membatalkan proses penambahan.");
+                }
+                deferredPrompt = null;
+            });
+        }
+    });
+
+    return; // Stop eksekusi kode lanjutan sampai aplikasi dijalankan dari layar utama
+}
 
             // Update data counter on load
             updateDataCounter();
