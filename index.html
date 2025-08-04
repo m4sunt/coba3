@@ -46,8 +46,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="BukuTamu" />
-    <link rel="apple-touch-icon" href="/coba3/icon-192.png" />
-    <link rel="manifest" href="/coba3/manifest.json" />
+    <link rel="apple-touch-icon" href="icon-192.png" />
+    <link rel="manifest" href="manifest.json" />
     <title>Buku Tamu Digital</title>
     <style>
         body {
@@ -99,37 +99,28 @@
         #btnExport { background: #17a2b8; color: white; }
         #btnClearAll { background: #dc3545; color: white; }
         #btnSimpan { font-size: 18px; width: 100%; padding: 12px; background: #28a745; color: white; }
-        #btnAddToHomeScreen { background: #ff9500; color: white; margin-top: 10px; }
-        .disabled-section {
-            pointer-events: none;
-            opacity: 0.5;
-        }
     </style>
 </head>
 <body>
     <h1>BUKU TAMU INSPEKTORAT DAERAH</h1>
-    <div id="installPrompt" class="warning">
-        Tambahkan aplikasi ini ke layar utama untuk mengakses form, tanda tangan, dan kamera!
-        <button id="btnAddToHomeScreen">📱 Tambah ke Layar Utama</button>
-    </div>
     <div style="margin-bottom: 20px; display: flex; gap: 10px;">
         <button type="button" id="btnForm">📝 Form Input</button>
         <button type="button" id="btnData">📊 Lihat Data (<span id="dataCount">0</span>)</button>
         <button type="button" id="btnExport">💾 Export Data</button>
     </div>
-    <div id="formSection" class="disabled-section">
+    <div id="formSection">
         <form id="bukuTamuForm" onsubmit="return false;">
             <label>Nama: <span class="required">*</span></label>
-            <input id="nama" required type="text" disabled /><br /><br />
+            <input id="nama" required type="text" /><br /><br />
             <label>INSTANSI/ASAL: <span class="required">*</span></label>
-            <select id="asal" required disabled>
+            <select id="asal" required>
                 <option value="">-- Pilih Asal --</option>
                 <option value="INSTANSI">INSTANSI/UNIT KERJA</option>
                 <option value="MASYARAKAT">MASYARAKAT</option>
             </select><br /><br />
             <div class="hidden" id="daftarInstansi">
                 <label>DAFTAR INSTANSI/UNIT KERJA: <span class="required">*</span></label>
-                <select id="instansi" disabled>
+                <select id="instansi">
                     <option value="">-- Pilih Instansi --</option>
                     <option>SEKRETARIAT DAERAH</option>
                     <option>SEKRETARIAT DPRD</option>
@@ -168,7 +159,7 @@
             </div>
             <div class="hidden" id="daftarMasyarakat">
                 <label>Kecamatan: <span class="required">*</span></label>
-                <select id="kecamatan" disabled>
+                <select id="kecamatan">
                     <option value="">-- Pilih Kecamatan --</option>
                     <option value="Tulang Bawang Tengah">Tulang Bawang Tengah</option>
                     <option value="Tulang Bawang Udik">Tulang Bawang Udik</option>
@@ -181,12 +172,12 @@
                     <option value="Batu Putih">Batu Putih</option>
                 </select><br /><br />
                 <label>Desa/Tiyuh: <span class="required">*</span></label>
-                <select id="desa" disabled>
+                <select id="desa">
                     <option value="">-- Pilih Desa --</option>
                 </select><br /><br />
             </div>
             <label>PIHAK YANG DITEMUI: <span class="required">*</span></label>
-            <select id="pihakDitemui" required disabled>
+            <select id="pihakDitemui" required>
                 <option value="">-- Pilih Pihak yang Ditemui --</option>
                 <option>INSPEKTUR</option>
                 <option>SEKRETARIS</option>
@@ -197,7 +188,7 @@
                 <option>IRBAN 4</option>
             </select><br /><br />
             <label>JENIS LAYANAN: <span class="required">*</span></label>
-            <select id="jenisLayanan" required disabled>
+            <select id="jenisLayanan" required>
                 <option value="">-- Pilih Jenis Layanan --</option>
                 <option>Permintaan Audit/Klarifikasi Khusus</option>
                 <option>Penanganan Pengaduan</option>
@@ -209,20 +200,21 @@
                 <option>Tindak Lanjut Temuan</option>
             </select><br /><br />
             <label>URAIAN: <span class="required">*</span></label>
-            <input id="uraian" required type="text" disabled /><br /><br />
+            <input id="uraian" required type="text" /><br /><br />
             <label>NOMOR HP: <span class="required">*</span></label>
-            <input id="nomorHp" inputmode="numeric" pattern="\d*" required type="text" disabled /><br /><br />
+            <input id="nomorHp" inputmode="numeric" pattern="\d*" required type="text" /><br /><br />
             <label>Tanda Tangan: <span class="required">*</span></label>
             <div class="warning hidden" id="signatureWarning">⚠️ Tanda tangan wajib diisi!</div>
-            <canvas id="signature-pad" style="border:1px solid #ccc; width: 100%; border-radius: 4px; pointer-events: none;"></canvas><br />
-            <button type="button" id="btnClearSignature" style="margin-top: 5px;" disabled>🧹 Bersihkan</button><br /><br />
+            <canvas id="signature-pad" style="border:1px solid #ccc; width: 100%; border-radius: 4px;"></canvas><br />
+            <button type="button" id="btnClearSignature" style="margin-top: 5px;">🧹 Bersihkan</button><br /><br />
             <label>Foto: <span class="required">*</span></label>
             <div class="warning hidden" id="photoWarning">⚠️ Foto wajib diambil atau diunggah!</div>
             <video id="video" width="300" height="225" autoplay muted playsinline style="border:1px solid #ccc;"></video><br />
             <canvas id="canvas" width="300" height="225" style="display:none;"></canvas>
-            <button type="button" id="btnAmbilFoto" style="margin-top: 10px;" disabled>📸 Ambil Foto</button>
+            <button type="button" id="btnAmbilFoto" style="margin-top: 10px;">📸 Ambil Foto</button>
+            <input type="file" id="fotoUpload" accept="image/*" style="margin-top: 10px;" /><br /><br />
             <img id="previewFoto" style="width:300px;display:none;border:1px solid #ccc;margin-bottom:10px;" alt="Hasil Foto">
-            <button type="button" id="btnSimpan" disabled>💾 Simpan Data</button>
+            <button type="button" id="btnSimpan">💾 Simpan Data</button>
         </form>
     </div>
     <div id="dataSection" class="hidden">
@@ -234,20 +226,13 @@
     </div>
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/coba3/service-worker.js')
-                .then(reg => console.log("Service worker terdaftar:", reg.scope))
-                .catch(err => {
-                    console.error("Gagal daftar SW:", err);
-                    alert("Gagal mendaftarkan Service Worker: " + err.message);
-                });
-        } else {
-            console.error("Service Worker tidak didukung oleh browser ini.");
-            alert("Browser Anda tidak mendukung Service Worker. Silakan gunakan browser modern seperti Chrome.");
+            navigator.serviceWorker.register('service-worker.js')
+                .then(reg => console.log("Service worker terdaftar:", reg))
+                .catch(err => console.error("Gagal daftar SW:", err));
         }
 
         document.addEventListener('DOMContentLoaded', () => {
             const form = document.getElementById('bukuTamuForm');
-            const formSection = document.getElementById('formSection');
             const asal = document.getElementById("asal");
             const daftarInstansi = document.getElementById("daftarInstansi");
             const daftarMasyarakat = document.getElementById("daftarMasyarakat");
@@ -269,71 +254,14 @@
             const btnSimpan = document.getElementById('btnSimpan');
             const btnClearSignature = document.getElementById('btnClearSignature');
             const btnAmbilFoto = document.getElementById('btnAmbilFoto');
-            const btnAddToHomeScreen = document.getElementById('btnAddToHomeScreen');
-            const installPromptDiv = document.getElementById('installPrompt');
 
             let drawing = false;
             let hasSignature = false;
             let hasPhoto = false;
             let dataBukuTamu = JSON.parse(localStorage.getItem('dataBukuTamu') || '[]');
-            let deferredPrompt = null;
-            let isAppInstalled = false;
 
             // Update data counter on load
             updateDataCounter();
-
-            // Check if app is running in standalone mode (already installed)
-            if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
-                isAppInstalled = true;
-                enableForm();
-                installPromptDiv.classList.add('hidden');
-            }
-
-            // Handle Add to Home Screen prompt
-            window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();
-                deferredPrompt = e;
-                if (!isAppInstalled) {
-                    installPromptDiv.classList.remove('hidden');
-                    alert("Silakan tambahkan aplikasi ke layar utama untuk mengakses form!");
-                }
-            });
-
-           btnAddToHomeScreen.addEventListener('click', () => {
-    if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choiceResult) => {
-            if (choiceResult.outcome === 'accepted') {
-                console.log('User menambahkan aplikasi ke layar utama');
-
-                // Coba menutup browser (tidak semua browser mengizinkan ini)
-                // removed auto-close logic
-            } else {
-                console.log('User membatalkan penambahan ke layar utama');
-            }
-            deferredPrompt = null;
-            installPromptDiv.classList.add('hidden');
-        });
-    }
-});
-
-
-            // Hide prompt when app is installed
-            window.addEventListener('appinstalled', () => {
-                console.log('Aplikasi telah diinstal ke layar utama');
-                isAppInstalled = true;
-                enableForm();
-                installPromptDiv.classList.add('hidden');
-            });
-
-            function enableForm() {
-                formSection.classList.remove('disabled-section');
-                document.querySelectorAll('#bukuTamuForm input, #bukuTamuForm select, #btnSimpan, #btnClearSignature, #btnAmbilFoto, #fotoUpload').forEach(el => {
-                    el.removeAttribute('disabled');
-                });
-                signatureCanvas.style.pointerEvents = 'auto';
-                initializeCamera();
-            }
 
             // === DATA LENGKAP UNTUK DESA ===
             const dataDesa = {
@@ -372,34 +300,6 @@
             kecamatan.addEventListener('change', populateDesa);
             nomorHp.addEventListener('input', () => { nomorHp.value = nomorHp.value.replace(/\D/g, ''); });
             fotoUpload.addEventListener('change', handlePhotoUpload);
-// === POP-UP "Tambah ke Layar Utama" saat pertama buka ===
-if (!localStorage.getItem('popupShown')) {
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        setTimeout(() => {
-            document.getElementById('popupOverlay').classList.remove('hidden');
-            localStorage.setItem('popupShown', 'true');
-        }, 1000);
-    });
-}
-
-document.getElementById('btnPopupAdd').addEventListener('click', () => {
-    if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choiceResult) => {
-            if (choiceResult.outcome === 'accepted') {
-                console.log("User menambahkan ke layar utama");
-                // removed auto-close logic
-            } else {
-                console.log("User membatalkan");
-            }
-            document.getElementById('popupOverlay').style.display = 'none';
-            deferredPrompt = null;
-        });
-    }
-});
-
 
             signatureCanvas.addEventListener('mousedown', startDrawing);
             signatureCanvas.addEventListener('mousemove', draw);
@@ -460,7 +360,6 @@ document.getElementById('btnPopupAdd').addEventListener('click', () => {
             }
 
             function startDrawing(e) {
-                if (!isAppInstalled) return;
                 e.preventDefault();
                 drawing = true;
                 hasSignature = true;
@@ -470,7 +369,6 @@ document.getElementById('btnPopupAdd').addEventListener('click', () => {
             }
 
             function draw(e) {
-                if (!isAppInstalled) return;
                 e.preventDefault();
                 if (!drawing) return;
                 const { x, y } = getCanvasPos(e);
@@ -489,28 +387,27 @@ document.getElementById('btnPopupAdd').addEventListener('click', () => {
                 document.getElementById('signatureWarning').classList.add('hidden');
             }
 
-            function initializeCamera() {
-                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                    navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
-                        .then(stream => {
-                            video.srcObject = stream;
-                            console.log("Stream kamera berhasil:", stream.getVideoTracks());
-                        })
-                        .catch(err => {
-                            console.error("Kamera Error:", err.name, err.message);
-                            let errorMessage = "Kamera tidak bisa diakses. Mohon izinkan akses kamera pada browser Anda atau unggah foto.";
-                            if (err.name === "NotFoundError") {
-                                errorMessage = "Kamera tidak ditemukan. Pastikan perangkat Anda memiliki kamera aktif atau unggah foto.";
-                            } else if (err.name === "NotAllowedError") {
-                                errorMessage = "Izin kamera ditolak. Mohon izinkan akses kamera di pengaturan browser atau unggah foto.";
-                            } else if (err.name === "NotReadableError") {
-                                errorMessage = "Kamera sedang digunakan oleh aplikasi lain. Tutup aplikasi tersebut dan coba lagi atau unggah foto.";
-                            }
-                            alert(errorMessage);
-                        });
-                } else {
-                    alert("Browser Anda tidak mendukung akses kamera. Silakan unggah foto sebagai gantinya.");
-                }
+            // Initialize camera with better error handling
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+                    .then(stream => {
+                        video.srcObject = stream;
+                        console.log("Stream kamera berhasil:", stream.getVideoTracks());
+                    })
+                    .catch(err => {
+                        console.error("Kamera Error:", err.name, err.message);
+                        let errorMessage = "Kamera tidak bisa diakses. Mohon izinkan akses kamera pada browser Anda atau unggah foto.";
+                        if (err.name === "NotFoundError") {
+                            errorMessage = "Kamera tidak ditemukan. Pastikan perangkat Anda memiliki kamera aktif atau unggah foto.";
+                        } else if (err.name === "NotAllowedError") {
+                            errorMessage = "Izin kamera ditolak. Mohon izinkan akses kamera di pengaturan browser atau unggah foto.";
+                        } else if (err.name === "NotReadableError") {
+                            errorMessage = "Kamera sedang digunakan oleh aplikasi lain. Tutup aplikasi tersebut dan coba lagi atau unggah foto.";
+                        }
+                        alert(errorMessage);
+                    });
+            } else {
+                alert("Browser Anda tidak mendukung akses kamera. Silakan unggah foto sebagai gantinya.");
             }
 
             function ambilFoto() {
@@ -677,21 +574,5 @@ document.getElementById('btnPopupAdd').addEventListener('click', () => {
             }
         });
     </script>
-<div id="popupOverlay" class="hidden" style="
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background-color: rgba(0,0,0,0.6);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;">
-  <div style="background: white; padding: 20px; border-radius: 10px; max-width: 300px; text-align: center;">
-    <p>📱 Tambahkan aplikasi ini ke layar utama untuk akses cepat!</p>
-    <button id="btnPopupAdd" style="background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px;">➕ Tambah ke Layar Utama</button><br><br>
-    <button onclick="document.getElementById('popupOverlay').style.display='none'" style="background: #ccc; padding: 8px 12px; border: none; border-radius: 5px;">Tutup</button>
-  </div>
-</div>
-
 </body>
 </html>
