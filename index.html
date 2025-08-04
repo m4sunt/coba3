@@ -677,6 +677,63 @@
 
   window.addEventListener("DOMContentLoaded", blokirJikaBelumPWA);
 </script>
+<script>
+let deferredPrompt;
+let streamKamera = null;
+
+function isStandalone() {
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+
+function mulaiKamera() {
+  const video = document.getElementById('video');
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+      .then(stream => {
+        streamKamera = stream;
+        video.srcObject = stream;
+        console.log("✅ Kamera aktif");
+      })
+      .catch(err => {
+        console.warn("⚠️ Kamera gagal:", err.message);
+      });
+  }
+}
+
+function hentikanKamera() {
+  if (streamKamera) {
+    streamKamera.getTracks().forEach(track => track.stop());
+    console.log("🛑 Kamera dimatikan dari browser");
+  }
+}
+
+// Simpan event sebelum install
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById("btnInstallPWA").style.display = 'block';
+});
+
+// Saat tombol install ditekan
+document.getElementById("btnInstallPWA").addEventListener("click", async () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    const hasil = await deferredPrompt.userChoice;
+    if (hasil.outcome === "accepted") {
+      // Matikan kamera dari versi browser
+      hentikanKamera();
+      alert("✅ Aplikasi ditambahkan. Sekarang buka dari layar utama agar kamera aktif kembali.");
+    }
+    deferredPrompt = null;
+  }
+});
+
+// Saat halaman dibuka
+window.addEventListener("DOMContentLoaded", () => {
+  if (isStandalone()) {
+    mulaiKamera(); // kamera otomatis saat diakses dari layar utama
+  }
+});
 </script>
 
 </body>
