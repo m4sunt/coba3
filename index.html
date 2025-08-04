@@ -653,6 +653,23 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         enableInteraction();
         document.getElementById('installPrompt').style.display = 'none';
+btnInstall.addEventListener('click', async () => {
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+            // ✅ Tandai bahwa pengguna sudah menekan tombol
+            localStorage.setItem('installClicked', 'true');
+
+            // 🔒 Kunci halaman sementara sampai dibuka dari layar utama
+            installPrompt.innerHTML = "<p>✅ Berhasil ditambahkan! Silakan buka dari layar utama.</p>";
+            lockScreen.style.display = 'flex';
+            disableInteraction();
+        }
+        deferredPrompt = null;
+    }
+});
+
         document.getElementById('lockScreen').style.display = 'none';
     }
 });
