@@ -620,48 +620,24 @@
     // Jalankan saat halaman siap
     window.addEventListener('DOMContentLoaded', kunciFormJikaBukanStandalone);
 </script>
-<div id="installPrompt" style="display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#fff; padding:15px 20px; border:1px solid #ccc; border-radius:10px; box-shadow:0 5px 15px rgba(0,0,0,0.3); z-index:10000;">
-  <p style="margin:0 0 10px 0;">📲 Tambahkan aplikasi ini ke Layar Utama untuk mulai menggunakan.</p>
-  <button id="btnInstall" style="padding:10px 15px; background:#007bff; color:#fff; border:none; border-radius:5px;">Tambahkan ke Layar Utama</button>
+<!-- Pop-up ajakan instal -->
+<div id="forceInstallNotice" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #fffbe6; padding: 15px 20px; border: 1px solid #ffc107; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); z-index: 10000; display: none;">
+  <p style="margin: 0 0 10px 0; font-weight: bold;">📲 Tambahkan aplikasi ini ke Layar Utama agar bisa digunakan.</p>
+  <ul style="margin: 0; padding-left: 18px;">
+    <li>Di Android: Tekan ikon <strong>⋮</strong> → pilih <strong>Tambahkan ke layar utama</strong>.</li>
+    <li>Di iPhone: Tekan ikon <strong>Bagikan</strong> → <strong>Add to Home Screen</strong>.</li>
+  </ul>
 </div>
 
 <script>
-  let deferredPrompt;
-  const installPrompt = document.getElementById('installPrompt');
-  const btnInstall = document.getElementById('btnInstall');
-
   function isInStandaloneMode() {
-      return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    return (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true);
   }
 
-  window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      // Tampilkan prompt hanya jika belum standalone
-      if (!isInStandaloneMode()) {
-          installPrompt.style.display = 'block';
-      }
-  });
-
-  btnInstall.addEventListener('click', async () => {
-      if (deferredPrompt) {
-          deferredPrompt.prompt();
-          const { outcome } = await deferredPrompt.userChoice;
-          if (outcome === 'accepted') {
-              console.log("✅ Pengguna menerima prompt instalasi");
-              installPrompt.style.display = 'none';
-          } else {
-              console.log("❌ Pengguna menolak prompt");
-          }
-          deferredPrompt = null;
-      }
-  });
-
-  // Jika sudah diinstal, pastikan prompt tidak muncul
   window.addEventListener('DOMContentLoaded', () => {
-      if (isInStandaloneMode()) {
-          installPrompt.style.display = 'none';
-      }
+    if (!isInStandaloneMode()) {
+      document.getElementById('forceInstallNotice').style.display = 'block';
+    }
   });
 </script>
 
