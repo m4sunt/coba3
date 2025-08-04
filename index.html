@@ -621,6 +621,42 @@ window.addEventListener('DOMContentLoaded', () => {
         lockScreen.style.display = 'none';
     }
 });
+// 🔒 Blokir interaksi jika belum dibuka dari layar utama (PWA mode)
+function disableInteraction() {
+    const allInputs = document.querySelectorAll('input, select, button, textarea, canvas');
+    allInputs.forEach(el => {
+        el.disabled = true;
+        el.style.pointerEvents = 'none';
+        el.style.opacity = 0.5;
+    });
+}
+
+// ✅ Aktifkan kembali jika dibuka dari PWA
+function enableInteraction() {
+    const allInputs = document.querySelectorAll('input, select, button, textarea, canvas');
+    allInputs.forEach(el => {
+        el.disabled = false;
+        el.style.pointerEvents = '';
+        el.style.opacity = '';
+    });
+}
+
+function isInStandaloneMode() {
+    return (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (!isInStandaloneMode()) {
+        disableInteraction();
+        document.getElementById('installPrompt').style.display = 'block';
+        document.getElementById('lockScreen').style.display = 'flex';
+    } else {
+        enableInteraction();
+        document.getElementById('installPrompt').style.display = 'none';
+        document.getElementById('lockScreen').style.display = 'none';
+    }
+});
+
 </script>
 
 </body>
