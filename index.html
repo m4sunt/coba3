@@ -574,86 +574,46 @@
             }
         });
     </script>
+<!-- Tombol Tambahkan ke Layar Utama -->
+<div id="installPromptBanner" style="display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#ffffff; border:1px solid #ccc; border-radius:10px; box-shadow:0 5px 10px rgba(0,0,0,0.15); padding:15px 20px; z-index:9999; text-align:center;">
+    <p style="margin:0 0 10px 0;">📲 Untuk pengalaman maksimal, tambahkan ke layar utama.</p>
+    <button id="installBtn" style="padding:10px 15px; background-color:#007bff; color:white; border:none; border-radius:5px;">➕ Tambahkan ke Layar Utama</button>
+</div>
+
 <script>
-    // Cek apakah aplikasi dijalankan dari home screen (standalone mode)
+    let deferredPrompt;
+    const banner = document.getElementById('installPromptBanner');
+    const installBtn = document.getElementById('installBtn');
+
     function isInStandaloneMode() {
         return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
     }
 
-    // Fungsi kunci interaksi jika belum standalone
-    function kunciFormJikaBukanStandalone() {
-        if (!isInStandaloneMode()) {
-            // Nonaktifkan semua input dan tombol dalam form
-            const formElemen = document.querySelectorAll('#bukuTamuForm input, #bukuTamuForm select, #bukuTamuForm button, #bukuTamuForm canvas');
-            formElemen.forEach(el => {
-                if (el.tagName === 'CANVAS') {
-                    el.style.pointerEvents = 'none';
-                    el.style.opacity = '0.3';
-                } else {
-                    el.disabled = true;
-                }
-            });
-
-            // Tambahkan overlay agar jelas tidak bisa dipakai
-            const blocker = document.createElement('div');
-            blocker.style.position = 'fixed';
-            blocker.style.top = '0';
-            blocker.style.left = '0';
-            blocker.style.width = '100%';
-            blocker.style.height = '100%';
-            blocker.style.background = 'rgba(255,255,255,0.95)';
-            blocker.style.zIndex = '9999';
-            blocker.style.display = 'flex';
-            blocker.style.flexDirection = 'column';
-            blocker.style.alignItems = 'center';
-            blocker.style.justifyContent = 'center';
-            blocker.innerHTML = `
-                <div style="text-align: center; padding: 20px;">
-                    <h2 style="color: #dc3545;">⚠️ Aplikasi Belum Ditambahkan ke Layar Utama</h2>
-                    <p>Silakan tambahkan aplikasi ini ke layar utama untuk menggunakan fitur pengisian data.</p>
-                </div>
-            `;
-            document.body.appendChild(blocker);
-        }
-    }
-
-    // Jalankan saat halaman siap
-    window.addEventListener('DOMContentLoaded', kunciFormJikaBukanStandalone);
-</script>
-<!-- Tombol Tambahkan ke Layar Utama -->
-<div id="addToHomeContainer" style="display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#ffffff; border:1px solid #ccc; box-shadow: 0 5px 10px rgba(0,0,0,0.2); padding:15px 20px; border-radius:10px; z-index:9999;">
-    <span style="display:block; margin-bottom:10px;">📲 Tambahkan aplikasi ke layar utama untuk pengalaman terbaik</span>
-    <button id="addToHomeBtn" style="background:#007bff; color:white; border:none; padding:10px 15px; border-radius:5px;">➕ Tambahkan ke Layar Utama</button>
-</div>
-<script>
-    let deferredPrompt = null;
-
-    // Tangkap event sebeluminstallprompt
+    // Tampilkan banner hanya jika belum standalone
     window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredPrompt = e;
-        document.getElementById('addToHomeContainer').style.display = 'block';
+        if (!isInStandaloneMode()) {
+            banner.style.display = 'block';
+        }
     });
 
-    document.getElementById('addToHomeBtn').addEventListener('click', async () => {
+    // Jika diklik, munculkan prompt install
+    installBtn.addEventListener('click', async () => {
         if (deferredPrompt) {
             deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            if (outcome === 'accepted') {
-                console.log('✅ Aplikasi ditambahkan ke layar utama');
-                document.getElementById('addToHomeContainer').style.display = 'none';
-            } else {
-                console.log('❌ Pengguna menolak');
+            const result = await deferredPrompt.userChoice;
+            if (result.outcome === 'accepted') {
+                banner.style.display = 'none';
             }
             deferredPrompt = null;
         }
     });
 
-    // Sembunyikan tombol jika sudah dijalankan dari layar utama
+    // Jika sudah dari home screen, sembunyikan tombol
     window.addEventListener('DOMContentLoaded', () => {
-        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-        if (isStandalone) {
-            document.getElementById('addToHomeContainer').style.display = 'none';
+        if (isInStandaloneMode()) {
+            banner.style.display = 'none';
         }
     });
 </script>
