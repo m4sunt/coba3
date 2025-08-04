@@ -1109,6 +1109,31 @@ let deferredPrompt;
 window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
+const overlay = document.getElementById('overlayLock');
+const btnAddToHome = document.getElementById('btnAddToHome');
+
+let deferredPrompt;
+
+// Simpan event sebeluminstallprompt agar bisa dipicu nanti
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault(); // Cegah prompt otomatis
+    deferredPrompt = e;
+});
+
+// Saat tombol ditekan
+btnAddToHome.addEventListener('click', () => {
+    overlay.style.display = 'none';
+    btnAddToHome.style.display = 'none';
+
+    if (deferredPrompt) {
+        deferredPrompt.prompt(); // Tampilkan prompt
+        deferredPrompt.userChoice.then(choiceResult => {
+            console.log('Pilihan pengguna:', choiceResult.outcome);
+            deferredPrompt = null;
+        });
+    }
+});
+
 });
 
 </script>
