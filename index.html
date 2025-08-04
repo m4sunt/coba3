@@ -574,5 +574,54 @@
             }
         });
     </script>
+<div id="installPrompt" style="display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#fff; padding:15px 20px; border:1px solid #ccc; border-radius:10px; box-shadow:0 5px 15px rgba(0,0,0,0.3); z-index:9999;">
+    <p style="margin:0 0 10px 0;">⚠️ Tambahkan aplikasi ke layar utama untuk menggunakan</p>
+    <button id="btnInstall" style="padding:10px 15px; background:#28a745; color:#fff; border:none; border-radius:5px;">📲 Tambahkan ke Layar Utama</button>
+</div>
+<div id="lockScreen" style="position:fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:9998; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:bold;">
+    Mohon tambahkan ke layar utama untuk menggunakan aplikasi ini.
+</div>
+
+<script>
+let deferredPrompt;
+const installPrompt = document.getElementById('installPrompt');
+const btnInstall = document.getElementById('btnInstall');
+const lockScreen = document.getElementById('lockScreen');
+
+// Cek jika bukan dari mode standalone (web biasa)
+function isInStandaloneMode() {
+    return (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true);
+}
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (!isInStandaloneMode()) {
+        installPrompt.style.display = 'block';
+        lockScreen.style.display = 'flex';
+    }
+});
+
+btnInstall.addEventListener('click', async () => {
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+            installPrompt.style.display = 'none';
+            lockScreen.style.display = 'none';
+        }
+        deferredPrompt = null;
+    }
+});
+
+// Jika sudah dalam mode standalone, hapus lockscreen
+window.addEventListener('DOMContentLoaded', () => {
+    if (isInStandaloneMode()) {
+        installPrompt.style.display = 'none';
+        lockScreen.style.display = 'none';
+    }
+});
+</script>
+
 </body>
 </html>
