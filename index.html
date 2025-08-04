@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>BUKU TAMU INSPEKTORAT DAERAH</title>
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon.png">
@@ -13,6 +13,7 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 20px;
+            touch-action: manipulation; /* Optimize touch responsiveness */
         }
         .locked-message {
             display: none;
@@ -38,7 +39,7 @@
             max-width: 400px;
             height: 150px;
             background-color: #fff;
-            touch-action: none; /* Prevent default touch actions */
+            touch-action: none; /* Prevent default touch actions on canvas */
         }
         .signature-container {
             margin: 10px 0;
@@ -80,7 +81,7 @@
                 <option value="">-- Pilih Instansi --</option>
                 <option value="sekretariat-daerah">SEKRETARIAT DAERAH</option>
                 <option value="sekretariat-dprd">SEKRETARIAT DPRD</option>
-                <!-- Add other options as per your original HTML -->
+                <!-- Add other options as needed -->
             </select>
 
             <label for="kecamatan">Kecamatan: *</label>
@@ -120,7 +121,7 @@
             <div class="signature-container">
                 <label>Tanda Tangan: *</label>
                 <p>⚠️ Tanda tangan wajib diisi!</p>
-                <canvas id="signature-pad" width="400" height="150"></canvas>
+                <canvas id="signature-pad"></canvas>
                 <button type="button" id="clear-signature">🧹 Bersihkan Tanda Tangan</button>
             </div>
 
@@ -155,7 +156,10 @@
             }
         }
 
-        window.addEventListener('load', checkAccess);
+        window.addEventListener('load', () => {
+            checkAccess();
+            initSignaturePad(); // Initialize signature pad after load
+        });
 
         let deferredPrompt;
         const installButton = document.getElementById('install-button');
@@ -187,82 +191,90 @@
         });
 
         // --- Signature Pad Functionality ---
-        const canvas = document.getElementById('signature-pad');
-        const ctx = canvas.getContext('2d');
-        let isDrawing = false;
-        let lastX = 0;
-        let lastY = 0;
+        function initSignaturePad() {
+            const canvas = document.getElementById('signature-pad');
+            const ctx = canvas.getContext('2d');
+            let isDrawing = false;
+            let lastX = 0;
+            let lastY = 0;
 
-        function getPosition(event) {
-            const rect = canvas.getBoundingClientRect();
-            let clientX, clientY;
-            if (event.type.startsWith('touch')) {
-                clientX = event.touches[0].clientX;
-                clientY = event.touches[0].clientY;
-            } else {
-                clientX = event.clientX;
-                clientY = event.clientY;
-            }
-            return {
-                x: clientX - rect.left,
-                y: clientY - rect.top
-            };
-        }
+            // Adjust canvas for high-DPI displays
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = 400 * dpr;
+            canvas.height = 150 * dpr;
+            canvas.style.width = '400px';
+            canvas.style.height = '150px';
+            ctx.scale(dpr, dpr);
 
-        function startDrawing(event) {
-            event.preventDefault();
-            isDrawing = true;
-            const pos = getPosition(event);
-            lastX = pos.x;
-            lastY = pos.y;
-        }
-
-        function draw(event) {
-            if (!isDrawing) return;
-            event.preventDefault();
-            const pos = getPosition(event);
-            ctx.beginPath();
-            ctx.moveTo(lastX, lastY);
-            ctx.lineTo(pos.x, pos.y);
+            // Set drawing styles
             ctx.strokeStyle = '#000';
             ctx.lineWidth = 2;
             ctx.lineCap = 'round';
-            ctx.stroke();
-            lastX = pos.x;
-            lastY = pos.y;
-        }
+            ctx.lineJoin = 'round';
 
-        function stopDrawing() {
-            isDrawing = false;
-        }
-
-        // Mouse events
-        canvas.addEventListener('mousedown', startDrawing);
-        canvas.addEventListener('mousemove', draw);
-        canvas.addEventListener('mouseup', stopDrawing);
-        canvas.addEventListener('mouseout', stopDrawing);
-
-        // Touch events
-        canvas.addEventListener('touchstart', startDrawing);
-        canvas.addEventListener('touchmove', draw);
-        canvas.addEventListener('touchend', stopDrawing);
-
-        // Clear signature
-        document.getElementById('clear-signature').addEventListener('click', () => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-        });
-
-        // Form validation for signature
-        document.getElementById('guest-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const dataUrl = canvas.toDataURL();
-            if (dataUrl === canvas.toDataURL('image/png')) {
-                alert('Tanda tangan wajib diisi!');
-                return;
+            function getPosition(event) {
+                const rect = canvas.getBoundingClientRect();
+                return {
+                    x: (event.clientX - rect.left) * (canvas.width / dpr) / rect.width,
+                    y: (event.clientY - rect.top) * (canvas.height / dpr) / rect.height
+                };
             }
-            console.log('Form submitted with signature:', dataUrl);
-            // Add your form submission logic here
-        });
+
+            function startDrawing(event) {
+                event.preventDefault();
+                isDrawing = true;
+                const pos = getPosition(event);
+                lastX = pos.x;
+                lastY = pos.y;
+                console.log('Start drawing at:', pos); // Debug
+            }
+
+            function draw(event) {
+                if (!isDrawing) return;
+                event.preventDefault();
+                const pos = getPosition(event);
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(pos.x, pos.y);
+                ctx.stroke();
+                lastX = pos.x;
+                lastY = pos.y;
+                console.log('Drawing to:', pos); // Debug
+            }
+
+            function stopDrawing() {
+                isDrawing = false;
+                console.log('Stop drawing'); // Debug
+            }
+
+            // Use Pointer Events for better compatibility
+            canvas.addEventListener('pointerdown', startDrawing);
+            canvas.addEventListener('pointermove', draw);
+            canvas.addEventListener('pointerup', stopDrawing);
+            canvas.addEventListener('pointerleave', stopDrawing);
+
+            // Clear signature
+            document.getElementById('clear-signature').addEventListener('click', () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                console.log('Signature cleared'); // Debug
+            });
+
+            // Form validation for signature
+            document.getElementById('guest-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const dataUrl = canvas.toDataURL('image/png');
+                const emptyCanvas = document.createElement('canvas');
+                emptyCanvas.width = canvas.width;
+                emptyCanvas.height = canvas.height;
+                const emptyDataUrl = emptyCanvas.toDataURL('image/png');
+                if (dataUrl === emptyDataUrl) {
+                    alert('Tanda tangan wajib diisi!');
+                    return;
+                }
+                console.log('Form submitted with signature:', dataUrl);
+                // Add your form submission logic here
+            });
+        }
 
         // --- Service Worker Registration ---
         if ('serviceWorker' in navigator) {
