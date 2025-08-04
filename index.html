@@ -574,49 +574,5 @@
             }
         });
     </script>
-<!-- Tombol Tambahkan ke Layar Utama -->
-<div id="installPromptBanner" style="display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#ffffff; border:1px solid #ccc; border-radius:10px; box-shadow:0 5px 10px rgba(0,0,0,0.15); padding:15px 20px; z-index:9999; text-align:center;">
-    <p style="margin:0 0 10px 0;">📲 Untuk pengalaman maksimal, tambahkan ke layar utama.</p>
-    <button id="installBtn" style="padding:10px 15px; background-color:#007bff; color:white; border:none; border-radius:5px;">➕ Tambahkan ke Layar Utama</button>
-</div>
-
-<script>
-    let deferredPrompt;
-    const banner = document.getElementById('installPromptBanner');
-    const installBtn = document.getElementById('installBtn');
-
-    function isInStandaloneMode() {
-        return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-    }
-
-    // Tampilkan banner hanya jika belum standalone
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        if (!isInStandaloneMode()) {
-            banner.style.display = 'block';
-        }
-    });
-
-    // Jika diklik, munculkan prompt install
-    installBtn.addEventListener('click', async () => {
-        if (deferredPrompt) {
-            deferredPrompt.prompt();
-            const result = await deferredPrompt.userChoice;
-            if (result.outcome === 'accepted') {
-                banner.style.display = 'none';
-            }
-            deferredPrompt = null;
-        }
-    });
-
-    // Jika sudah dari home screen, sembunyikan tombol
-    window.addEventListener('DOMContentLoaded', () => {
-        if (isInStandaloneMode()) {
-            banner.style.display = 'none';
-        }
-    });
-</script>
-
 </body>
 </html>
